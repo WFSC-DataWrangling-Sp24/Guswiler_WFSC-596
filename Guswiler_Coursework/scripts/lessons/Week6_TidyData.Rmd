@@ -19,11 +19,11 @@ This week's lessons are about how to take untidy data tidy.
 
 First, let's remind ourselves what out "tidy" data means.
 
-![](../../docs/tidy_data.jpeg)
+![](../../documents/tidy_data.jpeg)
 
 Unfortunately, a lot of existing data doesn't follow these rules. The way in which datasets are untidy are always unique.
 
-![](../../docs/messy_data.jpeg)
+![](../../documents/messy_data.jpeg)
 
 However, to analyze the data, we typically need data to be in a tidy format. We can use a number of functions from the `tidyr` package in the `tidyverse` to help make the data tidy.
 
@@ -66,13 +66,13 @@ One of the key ways that we need to wrangle data is between "wide" format and "l
 
 **Wide Data**
 
-![](../../docs/wide_data.png){width="50%"}
+![](../../documents/wide_data.png){width="50%"}
 
 Might want to change the Sites to their own column. Wide data has issues with maintaining data in column names. Better to store your data in wide format, but sometimes you do need wide data.
 
 **Long Data**
 
-![](../../docs/long_data.png){width="50%"}
+![](../../documents/long_data.png){width="50%"}
 
 One common issue with wide data is that data is spread over multiple columns that should be in one. For example, in the tables above, the "Sites" as column names are violating the rule of not having data in column names. Instead, that data should be in one column, like in the long data.
 

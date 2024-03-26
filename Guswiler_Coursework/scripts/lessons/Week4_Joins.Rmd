@@ -63,7 +63,7 @@ up data by column name (`bind_rows`, adds rows based on column names,
 makes data set longer/taller) or row position (`bind_cols`, adds more
 columns or variables to the data you already have, males data wider).
 
-![](../../docs/binds.png){width="50%"}
+![](../../documents/binds.png){width="50%"}
 
 These can be very useful, but you need to be careful using them,
 especially `bind_cols`, as the function will automatically assume that
@@ -160,7 +160,7 @@ the `x1` column.
 This can happen a couple ways, depending on which data frame is the
 reference and how much data you want to retain.
 
-![](../../docs/joins.png){width="50%"}
+![](../../documents/joins.png){width="50%"}
 
 **To enable us to make these connections, the tables need one (or more)
 columns that link them together.**
