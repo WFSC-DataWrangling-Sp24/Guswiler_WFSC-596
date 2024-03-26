@@ -11,9 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Setup
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Install and load necessary packages.
 
 ```{r}
 # Install required packages if you do not already have them
@@ -26,7 +24,7 @@ library(here)
 
 ## Data Import
 
-Data from Ecological impact of inside/outside house cats around a suburban nature preserve ([Kays and DeWan, 2020](https://www.doi.org/10.5441/001/1.s6t84pb5)). 11 cats were tracked from May to August 1991 in Albany, NY.
+Data from Ecological impact of inside/outside house cats around a suburban nature preserve ([Kays and DeWan, 2020](https://www.doi.org/10.5441/001/1.s6t84pb5)). 12 cats were tracked from May to August 1991 in Albany, NY.
 
 ```{r, echo = FALSE}
 # Download data and reference files
