@@ -58,9 +58,9 @@ library(tidyverse)
 library(palmerpenguins)
 penguins <- penguins
 
-# installing {here} for use in .Rmd files to aid in navigating sub-directories
+# Had previously installed {here} for use in .Rmd files to aid in navigating sub-directories, but does not work as well in current file system within the Github repo. It was useful and will keep this note here for future reference.
 # install.packages("here")
-library(here)
+# library(here)
 ```
 
 ### 2. Portal Data Paths Review (20 points)
@@ -85,20 +85,20 @@ getwd()
 # download the files to daw_raw folder in project
 # surveys.csv
 download.file(url = "https://ndownloader.figshare.com/files/2292172",
-              destfile = here('data_raw/surveys.csv'))
+              destfile = '../../data_raw/plots.csv')
 
 #species.csv
 download.file(url = "https://ndownloader.figshare.com/files/3299483",
-              destfile = here('data_raw/species.csv'))
+              destfile = '../../data_raw/plots.csv')
 
 # plots.csv
 download.file(url = "https://ndownloader.figshare.com/files/3299474",
-              destfile = here('data_raw/plots.csv'))
+              destfile = "../../data_raw/plots.csv")
 
 # load data into workspace
-surveys <- read_csv(here("data_raw/surveys.csv"))
-species <- read_csv(here("data_raw/species.csv"))
-plots <- read_csv(here("data_raw/plots.csv"))
+surveys <- read_csv("../../data_raw/surveys.csv")
+species <- read_csv("../../data_raw/species.csv")
+plots <- read_csv("../../data_raw/plots.csv")
 
 #2c
 dipodomys_mass <- surveys %>% 
@@ -107,8 +107,8 @@ dipodomys_mass <- surveys %>%
   filter(genus == "Dipodomys") %>%              # filter for rows with genus = Dipodomys
   select(year, genus, species, weight, plot_type) # select relevant data
 
-write_csv(dipodomys_mass,                           # save data frame to clean_data
-          file = here("data_clean/dipodomys_mass.csv"))
+write_csv(dipodomys_mass,                           # save data frame to data_clean
+          file = "../../data_clean/dipodomys_mass.csv")
 
 #2d
 ggplot(surveys, aes(weight, hindfoot_length, # describe data to plot
@@ -118,7 +118,7 @@ ggplot(surveys, aes(weight, hindfoot_length, # describe data to plot
   labs(x = "Log Weight (g)",                 # change axes labels
        y = "Hindfoot Length (mm)")
 
-ggsave(here("outputs/HFL_v_Mass.png"))       # save plot to outputs
+ggsave("../../outputs/HFL_v_Mass.png")       # save plot to outputs
 
 
 surveys %>% 
@@ -129,7 +129,7 @@ surveys %>%
   labs(x = "Weight (g)",                       # change axes labels
        y = "Number of Individuals")
 
-ggsave(here("outputs/SubplotIndividuals_v_Mass.png"))  # save plot to outputs
+ggsave("../../outputs/SubplotIndividuals_v_Mass.png")  # save plot to outputs
 ```
 
 ### 3. Palmer Penguins and Path Files (20 points)
@@ -143,15 +143,15 @@ a.  The code chunk below uses the `download.file()` function to go to a specific
 
 # Adelie penguin data
 download.file(url = "https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-pal.219.3&entityid=002f3893385f710df69eeebe893144ff",
-              destfile = here("data_raw/adelie.csv"))
+              destfile = "../../data_raw/adelie.csv")
 
 # Gentoo penguin data
 download.file(url = "https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-pal.220.3&entityid=e03b43c924f226486f2f0ab6709d2381",
-              destfile = here("data_raw/gentoo.csv"))
+              destfile = "../../data_raw/gentoo.csv")
 
 # Chinstrap penguin data 
 download.file(url = "https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-pal.221.2&entityid=fe853aa8f7a59aa84cdd3197619ef462",
-              destfile = here("data_raw/chinstrap.csv"))
+              destfile = "../../data_raw/chinstrap.csv")
 ```
 
 b.  Copy and then run the code that you wrote to combine the three above datasets and have the output match the `penguins` dataframe from the `palmerpenguins` dataframe.
@@ -163,9 +163,9 @@ d.  Save your version of the cleaned penguins data into your clean data folder.
 
 # read data into environment
 penguins <- penguins
-adelie <- read_csv(here("data_raw/adelie.csv"))
-chinstrap <- read_csv(here("data_raw/chinstrap.csv"))
-gentoo <- read_csv(here("data_raw/gentoo.csv"))
+adelie <- read_csv("../../data_raw/adelie.csv")
+chinstrap <- read_csv("../../data_raw/chinstrap.csv")
+gentoo <- read_csv("../../data_raw/gentoo.csv")
 
 # merge separate data frames into one
 pengu <- adelie %>% 
@@ -196,7 +196,7 @@ pengu <- pengu %>%
 setdiff(pengu, penguins)
 
 #3d
-write_csv(pengu, here("data_clean/pengu.csv"))
+write_csv(pengu, "../../data_clean/pengu.csv")
 ```
 
 ### 4. Add Version Control: Together in Class (15 points)
