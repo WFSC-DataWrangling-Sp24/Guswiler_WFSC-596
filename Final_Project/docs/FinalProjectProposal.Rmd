@@ -1,0 +1,102 @@
+---
+title: "Final Project Proposal"
+author: "Olivia Guswiler"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Final Project Proposal
+
+Answering the questions in this document are worth 20 points for Question 5 in Week 9's Assignment.
+
+## Where to Find Data
+
+**If you have your own data from a research project, use it!**
+
+If you don't have your own data, here are some suggestions for where to find data:
+
+1.  From your lab group
+
+If you are working in a lab group, you can almost certainly find data to work with from your lab! Ask your PI or other lab members if you can use their data for this project. It is often helpful to have data that relates somewhat to a project or topic you are familiar with.
+
+2.  From me (actually from the National Phenology Network)!
+
+I currently have a project helping the National Phenology Network take data collected by communitiy members and cleaning it up so it can be integrated into the NPN database.
+
+If you choose to work with one of these datasets, I can give you some guidance on what the end product should look like.
+
+You can find a list of the dataset options [here](https://archive.usanpn.org/results/dataset-list).
+
+3.  From the "Data is Plural" Archive
+
+[Data is Plural](https://www.data-is-plural.com/) is a weekly newsletter about complied datasets that people have found. They have an archive of all of the datasets that have been included in the newsletters, which is nearly 2000.
+
+Just because the datasets have been compiled does not mean that they are clean! I've used a few of them in class as demonstrations.
+
+4.  From an agency, NGO, or non-profit
+
+If you have contacts in a local, state, or federal agency or non-profit, they likely have some languishing data floating around that you can clean up.
+
+5.  A data repository
+
+There are many data repositories where you can find data. I would recommend sticking to some of the other options above to keep your search a bit more constrained, but feel free to ultimately use any dataset you find that you would like to use.
+
+## Project Guidelines
+
+As a reminder, the general guidelines for the final project that the project will need to include core concepts covered in a certain number of weeks (10 for WFSC 596B), bringing together many aspects of what we will have learned through the course of the semester.
+
+The final project for this course is worth 500 points (WFSC 596B).
+
+## Questions
+
+The following answers are not binding! You can change your final project as much as you'd like from what you propose here.
+
+Answering these questions is meant to get you thinking about what data you would like to use and what tasks you might perform with the data.
+
+Note: Your data set does not need to be ecological in nature if you have another interest. It should also not be a dataset that we have used in class (see me if you have questions).
+
+1.  What data are you planning to use for the final project? Describe the data: its contents, its format(s), one or more dataframes, etc. If you have a link to the dataset, please include it. If you have a file that you can upload, please add it to the assignment submission.
+
+    *Answer*: Telemetry data and visual observations from Ecological impact of inside/outside house cats around a suburban nature preserve (.csv files, [Kays and DeWan, 2004](https://www.doi.org/10.5441/001/1.s6t84pb5)).
+
+2.  Does this data need to be cleaned in any way to make it tidy? If so, what needs to occur?
+
+    *Answer*: Yes! There is repeated data in certain columns, some unmatched column names, merging of files, and removing unnecessary variables.
+
+3.  Speaking generally, what tasks will you perform with this dataset? It might include tasks that we have not yet covered how to accomplish in class, but come up with a general plan that you would like to follow.
+
+    *Answer*: I will clean up the data, *try* (lol) to use `ctmm` to remake the space use maps.
+
+4.  One of the requirements of the final project is to make some type of plot using `ggplot2` with the data. What do you plan to plot from your data?
+
+    *Answer*: I will use `ctmm` to plot the home-ranges of each animal (n = 12), and compare them to the original publication (area vs number of fixes, [Figure 4](https://zslpublications-onlinelibrary-wiley-com.ezproxy3.library.arizona.edu/doi/pdf/10.1017/S1367943004001489)).
+
+# Reflection
+
+This reflection is worth 25 points, separate from your Week 9 assignment. Reflections are graded for completion only.
+
+Write about 5 sentences addressing *at least* one of the following questions.
+
+1.  What has worked well for you in this course for you so far?
+2.  What has been particularly challenging for you so far?
+3.  Is there anything that I can do to help your learning in the course?
+4.  Other reflections about the content of the module that you would like to share.
+
+*Answer*:
+
+1.  Flexibility with turn in dates, even though I haven't needed them yet, has been extremely helpful in lightening my mental load. Also, starting off in Posit cloud made it easy to follow along with notes and being able to go back in for the class notes if I missed a portion. Although, I think it would be useful to start working on our own computers in Rstudio a little sooner. My working memory is trash and as we kept building on previous knowledge, it made it difficult for me that I had to close the Posit session for the current assignment I was working on to open lesson notes from a previous session.
+2.  I do not feel challenged enough with the homework assignments. I do like the opportunity to work through them in class, between note taking, as it helps reinforce the information.
+3.  Expanding on what I said above, it would reinforce the lessons even more if there were more data problems that we had to work through outside of class. Incorporating some breakout sections directly in the class Rmarkdown files and keeping the homework assignments separate for us to complete outside of class would better help me retain the information from the lessons. This would force the students to go back into the lesson notes more often.
+4.  I've really enjoyed your teaching style!
+
+## Submitting this File
+
+1.  Create a new repository in the class GitHub organization for your final project. Use the naming convention "LastName_FinalProject"
+2.  Connect the repository to an RStudio project
+3.  Create a series of appropriate sub-directories in your RStudio Project, including a `documents` folder.
+4.  Move this file to the documents folder.
+5.  Stage, commit, and push this document (and sub-directory) to GitHub with a descriptive commit message.
