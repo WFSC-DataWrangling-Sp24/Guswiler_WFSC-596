@@ -1,0 +1,165 @@
+---
+title: "Assignment 7, Part I"
+author: "Olivia Guswiler"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Assignment Details
+
+### Purpose
+
+The goal of this assignment is to work with dates and times using the `lubridate` package.
+
+### Task
+
+Write R code to successfully answer each question below.
+
+### Criteria for Success
+
+-   Code is within the provided code chunks or new code chunks are created where necessary
+-   Code chunks run without errors
+-   Code chunks have brief comments indicating which code is answering which part of the question
+-   Code will be assessed as follows:
+    -   Produces the correct answer using the requested approach: 100%
+    -   Generally uses the right approach, but a minor mistake results in an incorrect answer: 90%
+    -   Attempts to solve the problem and makes some progress using the core concept, but returns the wrong answer and does not demonstrate comfort with the core concept: 50%
+    -   Answer demonstrates a lack of understanding of the core concept: 0%
+-   Any questions requiring written answers are answered with sufficient detail
+
+### Due Date
+
+March 11 at midnight MST
+
+# Assignment Exercises
+
+The assignment for week 7 is divided into 2 parts:
+
+-   Part 1: `lubridate`
+-   Part 2: `stringr`
+
+### 1. Set-Up (5 pts)
+
+Load in the `tidyverse`.
+
+```{r}
+#1
+library(tidyverse)
+library(here)
+```
+
+### 2. When Did You Knit This Document? (5 pts)
+
+Write code to do the following:
+
+a.  The first line should print only the date that you knit this document.
+b.  The second line should print the date and time that you knit this document.
+
+```{r}
+#2a
+today()
+
+#2b
+now(tzone = "MST")
+```
+
+### 3. Plant Vouchers (20 pts)
+
+During my PhD, I collected plant vouchers from my field site that I eventually submitted to the UA Herbarium for identification. I also got DNA sequences for most of them (but not all). Read in that dataset by running the code chunk below.
+
+```{r, include=FALSE}
+vouchers <- read_csv("https://raw.githubusercontent.com/weecology/DNA_metabarcoding/master/data/collection_data/plant_voucher_collection.csv")
+```
+
+a.  Using the `make_date` function and the `mutate()` function, create a new column called "collection_date" that has the year, month, and day that I collected the voucher specimen for each plant. Save this new column in the `vouchers` dataframe.
+b.  Using the `min()` function, find the earliest date that I collected a voucher specimen. Using the `summarize()` function is optional.
+c.  Use code to find the last date that I collected a vocuher specimen.
+d.  Find the span of time (duration) that I was collecting voucher specimens.
+e.  Create a column for the day of year that each specimen was collected.
+
+```{r}
+#3a
+vouchers <- vouchers %>%                            # specify data
+  mutate(collection_date = make_date(year = year,   # new col., populate with values
+                                     month = month, #  from year, month, and day cols.
+                                     day = day),
+         .before = season)                          # insert new col. before season col.
+vouchers
+
+#3b
+min(vouchers$collection_date,  # first date that a voucher was collected
+    na.rm = TRUE)              # remove any records missing collection_date
+
+#3c
+max(vouchers$collection_date,  # last date that a voucher was collected
+    na.rm = TRUE)
+
+#3d
+as.duration(                                      # output as a duration for the following
+  interval(                                       # interval between dates below
+    min(vouchers$collection_date, na.rm = TRUE),  # first date that a voucher was collected
+    max(vouchers$collection_date, na.rm = TRUE))) # last date that a voucher was collected
+
+#3e
+vouchers <- vouchers %>% 
+  mutate(DOY = yday(collection_date),   # new col. for day of year voucher was collected
+         .before = season)              # insert new col. before season col.
+vouchers
+```
+
+### 4. NDVI from the Santa Rita Experimental Range (20 pts)
+
+There is a large network of phenocams (cameras set up to take daily images of a landscape to monitor plant phenology) across the US. The Santa Rita Experimental Range (SRER) has one such camera.
+
+One value that we can calculate from these phenocam images is the NDVI of the landscape in the picture, which gives us a measurement of vegetation "greenness." This value is likely to change through time due to seasonal changes in temperature, precipitation, etc.
+
+Run the following code chunk to bring in a subset of the SRER phenocam data.
+
+```{r, include=FALSE}
+phenocam <- read_csv(here("data_raw/neon_srer_ndvi_phencom.csv"), skip = 17, col_names = TRUE, 
+                    col_types = "ccncc") %>% 
+  select(date, local_std_time, contains("mean"), NDVI_c)
+```
+
+a.  Create a new column in `phenocam` that uses the `unite()` function to join the date and time columns together into one column. Separate the date and time with a space.
+b.  Convert the datetime column you created in (a) to a POSIXct format. Save this new column to `phenocam`. You can use whichever function you would like.
+c.  Calculate the duration of the phenocam dataset provided here.
+d.  Create new columns in `phenocam` for the year, the month, and the day of year.
+e.  Using the year and month columns you created in (d), calculate the average NDVI value for each month in the dataset (each month in each year).
+
+```{r}
+#4a
+phenocam <- phenocam %>%          # specify data
+  unite(date_time,                # new col. name
+        c(date, local_std_time),  # cols. to combine
+        sep = " ")                # separate by a space
+phenocam
+
+#4b
+phenocam <- phenocam %>%
+  mutate(date_time = ymd_hms(date_time))  # convert date_time col. into POSIXct format
+phenocam
+
+#4c
+as.duration(                                # output as a duration for the following
+  interval(                                 # interval between dates below
+    min(phenocam$date_time, na.rm = TRUE),  # first date that image was taken
+    max(phenocam$date_time, na.rm = TRUE))) # last date that a image was taken
+
+#4d
+phenocam <- phenocam %>% 
+  mutate(year = year(date_time),    # create col. for year
+         month = month(date_time),  # create col. for month
+         DOY = yday(date_time),     # create col. for day of year
+         .before = r_mean)          # insert new col. before r_mean col.
+phenocam
+
+#4e
+phenocam %>% 
+  group_by(year, month) %>%          # group data by year and month cols.
+  summarise(avg_NDVI = mean(NDVI_c)) # output the mean NDVI value for above groupings
+```

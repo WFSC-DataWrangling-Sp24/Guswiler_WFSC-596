@@ -1,0 +1,210 @@
+---
+title: 'Week 3: Assignment'
+author: "Olivia Guswiler"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+# Assignment Description
+
+### Purpose
+
+The goal of this assignment is to get comfortable importing data and working with 2-dimensional data in R using `dplyr`, part of the `tidyverse`.
+
+### Task
+
+Write R code to successfully answer each question below.
+
+### Criteria for Success
+
+-   Code is within the provided code chunks or new code chunks are created where necessary
+-   Code chunks run without errors
+-   Code chunks have brief comments indicating which code is answering which part of the question
+-   Code will be assessed as follows:
+    -   Produces the correct answer using the requested approach: 100%
+    -   Generally uses the right approach, but a minor mistake results in an incorrect answer: 90%
+    -   Attempts to solve the problem and makes some progress using the core concept, but returns the wrong answer and does not demonstrate comfort with the core concept: 50%
+    -   Answer demonstrates a lack of understanding of the core concept: 0%
+-   Any questions requiring written answers are answered with sufficient detail
+
+### Due Date
+
+Feb 5 at midnight MST
+
+# Exercises
+
+### Set-up (5 pts)
+
+To complete these exercises, we will need functions from the `dplyr` package and the `readr` package (`read_csv()`). Add a code chunk below and load these 2 packages into the workspace before beginning.
+
+```{r, message = FALSE}
+# load libraries, download csv for the assignment, and read .csv
+library(dplyr)
+library(readr)
+library(here)
+
+download.file("http://www.datacarpentry.org/semester-biology/data/shrub-volume-data.csv", here("data_raw/shrub-volume-data.csv"))
+
+
+shrub <- read_csv(here("data_raw/shrub-volume-data.csv"))
+```
+
+### 1. Shrub Volume Data Basics (20 pts)
+
+Dr. Morales is interested in studying the factors controlling the size and carbon storage of shrubs. She has conducted an experiment looking at the effect of three different treatments on shrub volume at four different locations.
+
+Get familiar with the data by importing it using `read_csv()` and use `dplyr` functions to complete the following tasks. Remember to add a code chunk!
+
+a.  Select the data from the length column.
+b.  Select the data from the site and experiment columns.
+c.  Add a new column named `area` containing the area of the shrub, which is the length times the width.
+d.  Sort the data by length.
+e.  Filter the data to include only plants with heights greater than 5.
+f.  Filter the data to include only plants with heights greater than 4 and widths greater than 2 (using `,` or `&` to include two conditions).
+g.  Filter the data to include only plants from Experiment 1 or Experiment 3 (using '\|' for "or").
+h.  Filter the data to remove rows with null values in the height column (using `!is.na`)
+i.  Create a new data frame called `shrub_volumes` that includes all of the original data and a new column containing the volumes (length \* width \* height). Remember to add a line of code afterwards with the name of the dataframe so the dataframe is printed.
+
+```{r}
+#1a
+select(shrub, length)
+
+#1b
+select(shrub, site, experiment)
+
+#1c
+mutate(shrub, area = length * width)
+
+#1d
+arrange(shrub, length)
+
+#1e
+filter(shrub, height > 5)
+
+#1f
+filter(shrub, height > 4 & width > 2)
+
+#1g
+filter(shrub, experiment == 1 | experiment == 3)
+
+#1h
+filter(shrub, !is.na(height))
+
+#1i
+shrub_volumes <- mutate(shrub, volume = length * width * height)
+shrub_volumes
+```
+
+### 2. Code Shuffle (15 pts)
+
+We are interested in understanding the monthly variation in precipitation in Tucson, AZ. We'll use some data from the NOAA National Climatic Data Center. Each row of the data is a year (from 2000-2023) and each column is a month (January - December).
+
+Rearrange the following program so that it:
+
+a.  Imports the data
+b.  Calculates the mean precipitation (ppt) in each month across years
+c.  Plots the monthly averages as a simple line plot
+
+Finally, add a comment above the code that describes what it does. The comment character in R is `#`.
+
+It's OK if you don't know exactly how the details of the program work at this point; you just need to figure out the right order of the lines based on when variables are defined and when they are used.
+
+```{r}
+#2
+# import tucson precip data
+ppt_data <- read.csv(here("data_raw/tucson_precip.csv"), header = FALSE)
+
+# calculate mean ppt for each month and assign list to a variable
+monthly_mean_ppt <- colMeans(ppt_data)
+
+# line plot of the monthly average precip in Tucson from 2000 to 2023
+plot(monthly_mean_ppt, type = "l", xlab = "Month", ylab = "Mean Precipitation") 
+
+```
+
+### 3. Portal Data Manipulation (20 pts)
+
+Load the `surveys.csv` file into R using `read_csv()`.
+
+*Note: Do not use pipes for this exercise.*
+
+a.  Use `select()` to create a new data frame with just the year, month, day, and species_id columns in that order.
+b.  Use `mutate()`, `select()`, and `filter()` with `!is.na()` to create a new data frame with the year, species_id, and weight in kilograms of each individual, with no null weights. The weight in the table is given in grams so you will need to create a new column for weight in kilograms by dividing the weight column by 1000.
+c.  Use the `filter()` function to get all of the rows in the data frame for the species ID `SH`.
+
+```{r}
+# load portal data
+surveys <- read_csv(here("data_raw/surveys.csv"))
+
+#3a
+select(surveys, year, month, day, species_id)
+
+#3b
+surveys_kg <- mutate(surveys, weight_kg = weight / 1000) # convert mass from g to kg
+surveys_wt.na <- filter(surveys_kg, !is.na(weight))      # remove entries with weight == "NA"
+surveys_yr_id_wt <- select(surveys_wt.na, year, 
+                           species_id, weight_kg)        # new data frame with year, species id, 
+surveys_yr_id_wt                                         #   and weights in kg (weight == "NA" removed)
+
+#3c
+filter(surveys, species_id == "SH")
+```
+
+### 4. Portal Data Manipulation Pipes (20 pts)
+
+Using the same data as you did in Exercise 3, use pipes (either `|>` or `%>%`) to combine the following operations to manipulate the data.
+
+a.  Use `mutate()`, `select()`, and `filter()` with `!is.na()` to create a new data frame with the year, species_id, and weight in kilograms of each individual, with no null weights.
+b.  Use the `filter()` and `select()` to get the year, month, day, and species_id columns for all of the rows in the data frame where species_id is `SH`.
+
+```{r}
+#4a
+surveys_pipe.a <- surveys |>           # define the group being trasformed
+  filter(!is.na(weight)) |>            # remove weight == "NA"
+  mutate(weight_kg = weight/1000) |>   # convert weights g to kg
+  select(year, species_id, weight_kg)  # cols included in new data.frame
+surveys_pipe.a
+
+#4b
+surveys |>                                # define group being transformed
+  select(year, month, day, species_id) |> # select desired cols
+  filter(species_id == "SH")              # return only rows with species "SH"
+```
+
+### 5. Portal Data Challenge (20 pts)
+
+Develop a data manipulation pipeline for the Portal surveys table that produces a table of data for only the three Dipodomys species (DM, DO, DS).
+
+-   The species IDs should be presented as lower case, not upper case.
+-   The table should contain information on the date, the species ID, the weight and hindfoot length.
+-   The data should not include null values for either weight or hindfoot length.
+-   The table should be sorted first by the species (so that each species is grouped together) and then by weight, with the largest weights at the top.
+
+```{r}
+#5
+surveys |>                                 # define group being transformed
+  filter(species_id == "DM" |              # filter to include only Dipodomys
+           species_id == "DO" | 
+           species_id == "DS",
+         !is.na(weight),                   # also filter out NA in weight and hindfoot
+         !is.na(hindfoot_length)) |> 
+  select(year, month, day, species_id,     # define desired columns for output
+         weight, hindfoot_length) |> 
+  arrange(species_id, desc(weight)) |>     # sort table by species and weight (greatest to smallest)
+  mutate(species_id = tolower(species_id)) # change species IDs to lower case
+```
+
+# Turning in Your Assignment
+
+Follow these steps to successfully turn in your assignment on D2L.
+
+1.  Click the `Knit` button up near the top of this document. This should produce a PDF file that shows up in the `Files` panel on the bottom-right of your screen. (*If you can't get your file to Knit to PDF, you can submit the .Rmd file instead.*)
+2.  Click the empty box to the left of the PDF file.
+3.  Click on the blue gear near the top of the `Files` panel and choose Export.
+4.  Put your last name at the front of the file name when prompted, then click the Download button. The PDF file of your assignment is now in your "Downloads" folder on your device.
+5.  Head over to D2L and navigate to the correct Assignment dropbox. Submit the PDF file that you just downloaded.

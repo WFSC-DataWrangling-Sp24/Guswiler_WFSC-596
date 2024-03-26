@@ -1,0 +1,203 @@
+---
+title: "Assignment 7, Part II"
+author: "Olivia Guswiler"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Assignment Details
+
+### Purpose
+
+The goal of this assignment is to work with dates and times using the `lubridate` package.
+
+### Task
+
+Write R code to successfully answer each question below.
+
+### Criteria for Success
+
+-   Code is within the provided code chunks or new code chunks are created where necessary
+-   Code chunks run without errors
+-   Code chunks have brief comments indicating which code is answering which part of the question
+-   Code will be assessed as follows:
+    -   Produces the correct answer using the requested approach: 100%
+    -   Generally uses the right approach, but a minor mistake results in an incorrect answer: 90%
+    -   Attempts to solve the problem and makes some progress using the core concept, but returns the wrong answer and does not demonstrate comfort with the core concept: 50%
+    -   Answer demonstrates a lack of understanding of the core concept: 0%
+-   Any questions requiring written answers are answered with sufficient detail
+
+### Due Date
+
+March 11 at midnight MST
+
+# Assignment Exercises
+
+The assignment for week 7 is divided into 2 parts:
+
+-   Part 1: `lubridate`
+-   Part 2: `stringr`
+
+This is Part 2, using `stringr`
+
+### 1. Set-Up (5 pts)
+
+Load in the `tidyverse`.
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+### 2. Vectors (10 pts)
+
+Let's ease into our practice working with strings with some lyrics from the first Black woman to ever hit the top of the Country music charts.
+
+No need to save your outputs.
+
+```{r}
+lyrics <- c("This ain't Texas (woo),", 
+           "ain't no hold 'em (hey)/",
+           "So lay your cards down, down, down, down")
+```
+
+a.  Use `str_length` to determine how many characters are in each string in the vector.
+b.  Use `str_count` to count the number of times the word "down" occurs in each string.
+c.  Use `str_detect` to find the strings which have the word "Texas" in them.
+d.  Use `str_subset` to select the string that have words in parentheses. Use the following regex as the pattern to match: `\\((.*?)\\)`. Remember that regex patterns need to go inside quotation marks.
+e.  Use `str_extract` to pull out the parentheticals themselves. Use the same regex as in (d)
+
+```{r}
+#2a
+lyrics %>% 
+  str_length()           # count number of char. in each string
+
+#2b
+lyrics %>% 
+  str_count("down")      # count number of times "down" occurs in each string
+
+#2c
+lyrics %>%  
+  str_detect("Texas")    # return T/F if "Texas" occurs in the string
+
+#2d
+lyrics %>% 
+  str_subset("\\(.*\\)") # return strings with anything in parentheses
+
+#2e
+lyrics %>% 
+  str_extract("\\(.*\\)") # return anything inside parentheses
+```
+
+### 3. Dugout Data (15 pts)
+
+Dugouts are human-made water reservoirs on the landscape, often used for cattle or other ranching ventures.
+
+Here is another example of data from my postdoc lab that I was asked to clean up. I'm going to go ahead and clean up the column names for the columns we will be using in the following questions.
+
+```{r}
+dugout <- read_csv(here("data_raw/elevation_2017.csv")) %>% 
+  rename(SoilSalinity = "Soil Salinity",
+         SoilZone = "Soil Zone",
+         MajorSalts = "Major Salts in groundwater",
+         WellLocation = "Location of nearest observation well",
+         ionConc.mg.L = "ion Concentration in groundwater (mg/L)",
+         DugoutElev = "dugout elevation above groundwater",
+         Depth = "2017 Well groundwater depth")
+dugout
+```
+
+You do not need to save any of the outputs for this question.
+
+a.  Using `filter` and `str_detect`, return rows that have "slight" in the values in the `SoilSalinity` column.
+b.  Using `filter` and `str_detect`, return rows that have a letter in the values in the `Site_ID` column. The regex pattern to match is `"[A-Z]+"`.
+c.  Using `mutate` and `str_replace`, replace the word "acid" with "acidic" in the `pH` column.
+
+```{r}
+#3a
+dugout %>% 
+  filter(str_detect(SoilSalinity, "slight")) # return rows that contain "slight" in SoilSalinity col.
+
+#3b
+dugout %>% 
+  filter(str_detect(Site_ID, "[A-Za-z]"))    # return rows with at least 1 letter 
+                                             #  (upper/lowercase) in Site_ID col.
+
+#3c
+dugout %>% 
+  mutate(pH = str_replace(pH,                
+                          "acid",            # in pH col., replace any occurance of "acid"
+                          "acidic"))         #  with "acidic"
+```
+
+### 4. Santa Cruz Rodents (20 pts)
+
+Remember the rodent data from the Santa Cruz that we used in our assignment for Week 6? There were quite a few columns that had messy data, and we used a combination of `replace` and `na_if` to address the issues.
+
+Let's use `stringr` functions to complete the same tasks.
+
+First, read in the `capture_data.csv` file.
+
+The column names in the dataset have not been cleaned. You can either clean up the column names before working through the questions or you can use the column names in backticks throughout the rest of the question--up to you!
+
+We will be using the `Species`, `Tail length`, `Hair sample (Y/N)`, and `Position (R/L)` columns.
+
+Also, you do not need to save any of the outputs from this question, though you can in b-d, if you would like to.
+
+```{r}
+capture <- read_csv(here("data_raw/capture_data.csv")) %>% 
+  rename("Trap_ID" = "Trap ID",                  # rename untidy col. variables
+         "Recapture" = "Status (R/N)",
+         "Mass_Total" = "Total Weight",
+         "Mass_Bag" = "Bag weight",
+         "Mass_Animal" = "Animal Weight",
+         "Length_HF" = "Hind foot length",
+         "Length_Tail" = "Tail length",
+         "Hair_Collected" = "Hair sample (Y/N)",
+         "Position" = "Position (R/L)") %>%
+  mutate(Recapture = replace(Recapture,           # replace "R"s in Recapture to "Y"s
+                             Recapture == "R",
+                             "Y"))
+capture
+```
+
+a.  Species codes should be exactly 4 characters long, not more and not less. Filter the dataframe (but do not save it) to show rows that have species codes that do not fit that requirement (hint: use `!=`).
+
+b.  Use `str_remove` to remove the `~` from the `Tail Length` column (it is in the last row).
+
+c.  Use `str_remove` to remove the `?` from the `Species` column.
+
+    Because `stringr` by default expects regex in the "pattern" argument and `?` is a special regex character, we need to use the pattern `"\\?"`. The `\\` is an "escape," telling regex to treat the ? as a regular ?, not as a regex symbol.
+
+d.  Use `str_replace` to replace the `?` in hair sample and position with `NA`. Remember to use `"\\?"`.
+
+    `stringr` expects a character value, and NA is not a character value--it is a NULL value. To get around this, we need to use `NA_character_` in place of `NA`, a special work around.
+
+```{r}
+#4a
+capture %>%
+  filter(str_count(Species) > 4)  # return all rows with >4 char. in Species col.
+
+#4b
+capture <- capture %>% 
+  mutate(Length_Tail = str_remove(Length_Tail, "~"),  # remove any "~" from col. values
+         Length_Tail = as.double(Length_Tail))        # change col. values from chr to dbl
+tail(capture)
+
+#4c
+capture <- capture %>% 
+  mutate(Species = str_remove(Species, "\\?"))  # remove any "?" from col. values
+capture
+
+#4d
+capture <- capture %>% 
+  mutate(Hair_Collected =                                     # replace any "?" in Hair_Collected
+           str_replace(Hair_Collected, "\\?", NA_character_), #  col. with /NA/
+         Position =                                           # replace any "?" in Position
+           str_replace(Position, "\\?", NA_character_))       #  col. with /NA/
+tail(capture)
+```

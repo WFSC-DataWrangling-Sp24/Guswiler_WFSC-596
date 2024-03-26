@@ -1,0 +1,199 @@
+---
+title: 'Week 2: Vectors: Notes'
+author: "Olivia Guswiler"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1-Dimensional Data: Vectors
+
+We can also assign more complex group of elements of the same type to a particular object. This is called a **vector**, a basic data structure in R.
+
+A vector is a sequence of values that are all the same data type. We can create them using the `c()` function, which stands for "combine".
+
+```{r}
+states <- c("AZ","NM","OR","MI","DE","TX","CA","AZ")
+```
+
+Using the `str` function we learned last time shows that this is a vector of 4 character strings. The output of the `str` function is essentially the same as what is shown in the environment tab.
+
+```{r}
+str(states)
+```
+
+## Sub-setting
+
+Sometimes we want to pull out and work with specific values from a vector. This is called sub-setting (taking a smaller set of the original).
+
+We do this with square brackets: `[]`. In general, square brackets in R means "give me part of something."
+
+### Sub-setting by Index
+
+One way that we can subset in R is by index, meaning based on the position of the value(s) we want to pull out.
+
+```{r}
+states[3]
+```
+
+Using the colon (1:3) is shorthand for making a vector of the whole numbers 1 through 3. This means that `states[1:3]` is the same as `states[c(1, 2, 3)]`.
+
+You can use a vector to get any subset or order you want `states[c(4, 1, 3)]`.
+
+Many functions in R take a vector as input and return a value. This includes the function `length`, which determines how many items are in a vector.
+
+```{r}
+states[1:3]
+
+states[c(4,1,3)] # to subset any order you want.
+```
+
+We can also calculate common summary statistics. For example, if we have a vector of population counts:
+
+```{r}
+pop <- c(120,30,70,145,156,234,654)
+
+mean(pop)
+sd(pop)
+median(pop)
+```
+
+### Let's Practice
+
+Practice working with vectors in Question 6 of the Assignment.
+
+## Null Values
+
+So far, we've worked with vectors that contain no missing values. In most real world data, however, there are often values that are missing for a variety of reasons.
+
+For example, kangaroo rats don't like being caught by humans and are pretty good at escaping before you've finished measuring them (speaking from personal experience here!).
+
+Missing values, known as "null" values, are written in R as `NA` with no quotes, which is short for "not available". A vector of 4 population counts with the third value missing would look like
+
+```{r}
+counts.na <- c(120,70,NA,143)
+```
+
+If we try to take the mean of this vector, we get `NA`. This is pretty weird!
+
+```{r}
+length(counts.na) # gives us full length
+mean(counts.na) # just get NA
+```
+
+This happens with most calculations when `NA` is in the data. Thankfully, we can tell many functions to remove the `NA` before calculating.
+
+We do this using an optional argument, which is an argument that we don't have to include unless we want to modify the default behavior of the function. We add optional arguments by providing their name (`na.rm`), `=`, and the value that we want those arguments to take (`TRUE`).
+
+```{r}
+mean(counts.na, na.rm = TRUE)
+```
+
+### Let's Practice
+
+Work on Question 7.
+
+## Working with Multiple Vectors
+
+Let's build on example where we have information on states and population counts by areas, all stored in vectors.
+
+```{r}
+# states vector from above
+# area for 7 states
+area <- c(30,79,43,23,83,45,23,234)
+counts <- c(2,453,54,56,243,78,34,45)
+```
+
+### Vector Math
+
+We can perform the same mathematical operation on each value in a vector by treating it like we would a single value. Let's say we wanted to double all of the values in the `area` vector.
+
+```{r}
+area*2
+```
+
+When do this multiplication, R multiplies the first value in the vector by 2, then multiplies the second values in the vector by 2, and so on. This is called *element-wise*, operating on one element of the vector at a time.
+
+Remember, this isn't saved unless we store it. For now, `area` hasn't changed.
+
+If we want to keep the results of the calculation in a new variable, we use the assignment operator.
+
+```{r}
+doubled.area <- area*2
+```
+
+We can also do element-wise math with multiple vectors of the same length. Let's divide the count vector by the area vector to get a vector of the density of individuals in that area.
+
+```{r}
+density <- counts / area
+density
+```
+
+When we divide the two vectors, R divides the first value in the first vector by the first value in the second vector, then divides the second values in each vector, and so on.
+
+## Conditional Sub-setting
+
+Sometimes we want to subset vectors based on whether a condition is being met rather than based on position or index.
+
+We can still do this with the square brackets: `[]`.
+
+Let's pull the density values for sites in Arizona.
+
+When setting a condition, we need to use `==`. This is how we indicate "equal to" in most programming languages. I often think of this as meaning "if and only if."
+
+```{r}
+# always start with vector from which you want data returned
+density[states == "AZ"]
+```
+
+We can also do the opposite, setting the condition as "not equal to."
+
+```{r}
+density[states < "NM"]
+```
+
+We can also set numerical conditional statements like greater or less than.
+
+Let's select states that meet with some restrictions on density
+
+```{r}
+#states with density > 3
+states[density > 3]
+
+# states with densities < 3
+states[density < 3]
+
+# states >= 1.2
+states[density >= 1.2]
+```
+
+-   Can subset a vector based on itself
+-   If we want to look at the densities greater than 3
+-   `density` is both the vector being subset and part of the condition
+
+```{r}
+# now we get density values pulled instead of states
+density[density <= 1.2]
+```
+
+### How is this actually working?
+
+Let's look more closely at the code inside the `[]`.
+
+```{r}
+density <= 1.2
+# gives us TRUE FALSE FALSE FALSE FALSE FALSE FALSE TRUE, giving us results based on position of TRUE/FALSE
+
+
+```
+
+This does an element-wise check to see if each value is \> 3. If it is the result is `TRUE`, if not it is `FALSE`.
+
+The `density[]` part of the code is saying to look in the `density` vector and return only those values where this inner vector value is `TRUE`.
+
+### Let's Practice
+
+Wrap up the Assignment by working Question 8 (and the optional Question 9).

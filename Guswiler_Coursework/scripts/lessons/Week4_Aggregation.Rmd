@@ -1,0 +1,184 @@
+---
+title: 'Week 4: Aggregation'
+author: "Olivia Guswiler"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Aggregation
+
+## Setup
+
+First, we need to load out packages that we will be using for our lesson. Again, we will need `readr` and `dplyr`.
+
+```{r}
+library(dplyr)
+library(readr)
+library(here)
+```
+
+Next, we read in our surveys data using the `read_csv()` function.
+
+```{r}
+surveys <- read_csv(here("data_raw/surveys.csv"))
+```
+
+## Split, Apply, Combine with `group_by()`
+
+One common way we analyze data is through something we call the "split, apply, combine" approach. This means that we:
+
+-   *split* data up into groups via some type of categorization
+-   *apply* some type of analysis to each group independently and
+-   *combine* the data back together
+
+The `group_by()` function lets us do this. Creates groups within the data set that we can then apply our analysis group by group rather than the entire data frame. **It is most often used in combination with `mutate()` or `summarize()`.**
+
+We'll only use summarize in our assignment.
+
+For example, we can use this method to calculate values for every year from the surveys data frame. In this case, we would group by the year column.
+
+Let's see what happens to the `surveys` dataframe when we group by the year column.
+
+```{r}
+surveys %>% 
+  group_by(year)
+# at the top of the tibble you can see the group name and number of groupings within all
+```
+
+The `group_by()` function doesn't seem to change the data frame visually in any way. However, you will notice that next to the information about the tibble (number of rows and columns), there is now an additional bit of information that tells us that this is now a grouped dataframe: grouped by the year column, and there are 26 groups.
+
+## Combining `group_by()` and `summarize()`
+
+After grouping a data frame, we can pipe it into a `summarize()` function to calculate values for each group.
+
+For example, we can use a new function (`n()`), which **will count up the number of rows per group**. That will give us the number of rodents caught during that year, which we will consider the abundance.
+
+```{r}
+surveys %>% 
+  group_by(year) %>% 
+  summarise(abundance = n()) # number of rows per year, b/c each row is an animal, the count gives us abundance
+
+# running w/o group_by(), n() counts up all the rows in the entire data.frame and spits that out for us. 
+# Not helpful
+surveys %>% 
+  summarise(abundance = n())
+```
+
+### Grouping by Multiple Columns
+
+To calculate the number of individuals caught in each plot for each year, we will want to group by both the year column and the plot_id column.
+
+Let's start by putting only the group by function.
+
+```{r}
+surveys %>% 
+  group_by(year, plot_id)
+```
+
+We can see that there are now 622 groups! Let's add our summarize function.
+
+```{r}
+surveys %>% 
+  group_by(year, plot_id) %>% 
+  summarize(abundance = n())
+# Now our output is abundance by plot each year.
+```
+
+### Let's Practice
+
+Start working on Question 1 and Question 2a-b.
+
+## Some Important Details
+
+**We can perform** **multiple calculations within the summarize function**.
+
+Quick notes on `summarize()` because we didn't go over it previously lol.
+
+```{r}
+# if you try to use a mutate or other maniputlation AFTER summarise, then it will not recognize that you previously had all those other columns in the original data.frame
+surveys %>% 
+  group_by(species_id) %>% 
+  summarise(abundance = n()) #summarize() and summarise() are the exact same thing
+
+```
+
+We'll calculate the number of individuals in each plot year combination and their average weight.
+
+```{r}
+surveys %>% 
+  group_by(year, plot_id) %>% # order that you put vairables in matters if you're doing complicated things, but likely won't be an issue if you're doing simple stuff like here.
+  summarise(abundance = n(), 
+            avg_mass = mean(weight, na.rm = TRUE)) # need to include na.rm = TRUE needs to be included in mean()
+# Return of NaN ("not a number") occurs when there are no values in the grouping. So there were no weights measured on plot 10 in 1977
+
+```
+
+How do we remove the NA values? We need to add the `na.rm = TRUE` argument to the `mean()` function. Done above.
+
+You'll note that the data frame till has `NaN`. This is for cases where no individuals in that group have a weight. We can remove those values using `!is.na()`.
+
+```{r}
+surveys %>% 
+  group_by(year, plot_id) %>%
+  summarise(abundance = n(), 
+            avg_mass = mean(weight, na.rm = TRUE)) %>% 
+  filter(!is.na(avg_mass))
+```
+
+Note the message about "grouped output." **It says that the resulting data frame is grouped by year. When we group by more than one column, the resulting data frame is grouped by all but the last group.**
+
+This can be useful in some more complicated circumstances, but it can also make things not work if functions that we want to use later don't support grouped data frames.
+
+If needed, we can remove these groups by adding an `ungroup()` function at the end of our pipeline.
+
+```{r}
+surveys %>% 
+  group_by(year, plot_id) %>%
+  summarise(abundance = n(), 
+            avg_mass = mean(weight, na.rm = TRUE)) %>%  #can't use mean(!is.na(weight)) b/c !is.na turns data into TRUE/FALSE and then reads them as binary.
+  filter(!is.na(avg_mass)) %>% 
+  ungroup() # will remove any remaining groupings in the data.frame
+```
+
+The message still prints because it happens as part of the summarize step, but looking at the resulting data frame shows us that the final data frame is ungrouped.
+
+### Let's Practice!
+
+Try working on Question 2c.
+
+## Using `group_by()` with `mutate()`
+
+While we most commonly will use grouping before the summarize function, there are some occassions where using groups with the `mutate()` function can be particularly helpful.
+
+**I won't be asking you to do something like this in your assignment, but I at least want you to know that it is possible!**
+
+Let's say we want to calculate the **relative abundance of each species per year**. As a reminder, the relative abundance is the total number of individuals of a species caught divided by the total number of rodents caught that year.
+
+We will want want to calculate (a) the abundance of each species in each year, (b) the total number of rodents caught in that year, and (c) divide them.
+
+```{r}
+surveys %>% 
+  group_by(year, species_id) %>% 
+  # calculates total # of indv. per sp. per year
+  summarise(abundance = n()) 
+  
+surveys %>% 
+  group_by(year, species_id) %>% 
+  summarise(abundance = n()) %>% 
+  # calculates total number of animals captured each year
+  mutate(total_abund = sum(abundance))
+
+surveys %>% 
+  group_by(year, species_id) %>% 
+  summarise(abundance = n()) %>% 
+  mutate(total_abund = sum(abundance),
+         rel_abund = abundance / total_abund)
+```
+
+### Let's Practice
+
+Keep working on using `group_by()` and `summarise()` together with some other `dplyr` functions. Tackle Question 3.

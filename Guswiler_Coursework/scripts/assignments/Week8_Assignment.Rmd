@@ -1,0 +1,306 @@
+---
+title: "Assignment 8"
+author: "Olivia Guswiler"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Assignment Details
+
+### Purpose
+
+The goal of this assignment is to practice problem decomposition and some best practices in reproducibility .
+
+### Task
+
+Write R code to successfully answer each question below.
+
+### Criteria for Success
+
+-   Code is within the provided code chunks or new code chunks are created where necessary
+-   Code chunks run without errors
+-   Code chunks have brief comments indicating which code is answering which part of the question
+-   Code will be assessed as follows:
+    -   Produces the correct answer using the requested approach: 100%
+    -   Generally uses the right approach, but a minor mistake results in an incorrect answer: 90%
+    -   Attempts to solve the problem and makes some progress using the core concept, but returns the wrong answer and does not demonstrate comfort with the core concept: 50%
+    -   Answer demonstrates a lack of understanding of the core concept: 0%
+-   Any questions requiring written answers are answered with sufficient detail
+
+### Due Date
+
+March 18 at midnight MST
+
+# Assignment Exercises
+
+### 1. Set-Up (5 pts)
+
+Load in the `tidyverse` to get started. If you haven't downloaded the files for the week (found at the beginning of the lesson), you will need to do so.
+
+```{r}
+library(tidyverse)
+library(here)
+```
+
+### 2. Portal Data Review (25 points)
+
+For this question, we are using the Portal data to review many of the `dplyr`, `tidyr`, and `ggplot2` functions we have learned so far.
+
+Load the 3 dataframes below into R using `read_csv()`.
+
+-   [`surveys.csv`](https://ndownloader.figshare.com/files/2292172)
+-   [`species.csv`](https://ndownloader.figshare.com/files/3299483)
+-   [`plots.csv`](https://ndownloader.figshare.com/files/3299474)
+
+```{r}
+surveys <- read_csv(here("data_raw/surveys.csv"))
+species <- read_csv(here("data_raw/species.csv"))
+plots <- read_csv(here("data_raw/plots.csv"))
+```
+
+a.  Create a data frame with only data for the `species_id` `DO`, with the columns `year`, `month`, `day`, `species_id`, and `weight`.
+b.  Create a data frame with only data for species IDs `PP` and `PB` and for years starting in 1995, with the columns `year`, `species_id`, and `hindfoot_length`, with no null values for `hindfoot_length`.
+c.  Create a data frame with the average `hindfoot_length` for each `species_id` in each `year` with no null values.
+d.  Create a data frame with the `year`, `genus`, `species`, `weight` and `plot_type` for all cases where the `genus` is `"Dipodomys"`.
+e.  Make a scatter plot with `weight` on the x-axis and `hindfoot_length` on the y-axis. Use a `log10` scale on the x-axis. Color the points by `species_id`. Include good axis labels.
+f.  Make a histogram of weights with a separate subplot for each `species_id`. Do not include species with no weights. Set the `scales` argument in the `facet_wrap()` function to `"free_y"` so that the y-axes can vary. Include good axis labels.
+g.  (Challenge, optional) Make a plot with histograms of the weights of three species, `PP`, `PB`, and `DM`, colored by `species_id`, with a different facet (i.e., subplot) for each of three `plot_type`'s `Control`, `Long-term Krat Exclosure`, and `Short-term Krat Exclosure`. Include good axis labels and a title for the plot. Export the plot to a `png` file.
+
+```{r}
+#2a
+surveys %>% 
+  filter(species_id == "DO") %>%               # filter for species DO
+  select(year, month, day, species_id, weight) # select relevant data
+
+#2b
+surveys %>% 
+  filter(year >= 1995,                      # filter for years 1995+ and species PP or PB
+         species_id == "PP" | species_id == "PB") %>% 
+  drop_na(hindfoot_length) %>%              # remove rows without hindfoot measurement
+  select(year, species_id, hindfoot_length) # select relevant data
+
+#2c
+surveys %>% 
+  drop_na(year, species_id,                   # remove rows without year, species,
+          hindfoot_length) %>%                #  and hindfoot data
+  group_by(species_id, year) %>%              # group by species and year
+  summarise(mean_hindfoot_length = mean(hindfoot_length)) # summaries groups by mean hf length
+
+#2d
+surveys %>% 
+  inner_join(species, by = "species_id") %>%    # join surveys with species
+  inner_join(plots, by = "plot_id") %>%         #  and plot_id data frames
+  filter(genus == "Dipodomys") %>%              # filter for rows with genus = Dipodomys
+  select(year, genus, species, weight, plot_type) # select relevant data
+
+#2e
+ggplot(surveys, aes(weight, hindfoot_length, # describe data to plot
+                    color = species_id)) +   # diff color for each species
+  geom_point() +                             # scatter plot
+  scale_x_log10() +                          # change x axis to log scale
+  labs(x = "Log Weight (g)",                 # change axes labels
+       y = "Hindfoot Length (mm)")
+
+#2f
+surveys %>% 
+  drop_na(weight) %>%                          # remove rows without weight data
+  ggplot(aes(weight)) +                        # describe data to plot
+  geom_histogram() +                           # histogram
+  facet_wrap(~species_id, scales = "free_y") + # subplots for each species, y-axis scale free
+  labs(x = "Weight (g)",                       # change axes labels
+       y = "Number of Individuals")
+
+#2g
+surveys %>%
+  inner_join(plots, by = "plot_id") %>%       # join surveys with plot_id
+  filter(species_id == "PP" |                 # filter for species PP, PB,
+           species_id == "PB" |               #  or DM and plots control, 
+           species_id == "DM",                #  LT, or ST Krat excls
+         plot_type == "Control" |
+           plot_type == "Long-term Krat Exclosure" |
+           plot_type == "Short-term Krat Exclosure") %>% 
+  ggplot(aes(weight, fill = species_id)) +           # describe data to plot
+  geom_histogram() +                                 # histogram
+  facet_wrap(~plot_type) +                           # subplots for each plot_type
+  labs(title = "Size Distribution Comparison Across Treatments", # rename axes and title
+       x = "Weight (g)", y = "Number of Individuals")
+
+  ggsave(here("outputs/Assignment8_2g.png"))   # save plot as PNG
+```
+
+### 3. Megafaunal Extinction (35 points)
+
+There were a relatively large number of extinctions of mammalian species roughly 10,000 years ago. To help understand why these extinctions happened scientists are interested in understanding if there were differences in the size of the species that went extinct and those that did not. You are going to reproduce the three main figures from one of the major papers on this topic [Lyons et al. 2004](http://www.evolutionary-ecology.com/issues/v06n03/ddar1499.pdf).
+
+You will do this using a large dataset of mammalian body sizes (`mammal-size-data-clean.txt`) that has data on the mass of recently extinct mammals as well as extant mammals (i.e., those that are still alive today).
+
+a.  Import the data into R. As with most real world data there are a some things about the dataset that you'll need to identify and address during the import process. Print out the structure of the resulting data frame.
+b.  Create a plot showing histograms of masses for mammal species that are still present and those that went extinct during the Pleistocene (`extant` and `extinct` in the `status` column). There should be one sub-plot for each continent and that sub-plot should show the histograms for both groups as a stacked histogram. To match the original analysis don't include islands (`Insular` and `Oceanic` in the `continent` column) and or the continent labeled `EA` (because `EA` had no species that went extinct in the Pleistocene). Scale the x-axis logarithmically and use 25 bins to roughly match the original figure. Use good axis labels.
+c.  The 2nd figure in the original paper looks in more detail at two orders, *Xenarthra* and *Carnivora*, which showed extinctions in North and South America. Create a figure similar to the one in Part 2, but that shows 4 sub-plots, one for each order on each of the two continents. Still scale the x-axis logarithmically, but use 19 bins to roughly match the original figure.
+d.  The 3rd figure in the original paper explores Australia as a case study. Australia is interesting because there is good data on both Pleistocene extinctions (`extinct` in the `status` column) and more modern extinctions occurring over the last 300 years (`historical` in the `status` column). Make single stacked histogram that compares the sizes of `extinct`, `extant`, and `historical` statuses. Scale the x-axis logarithmically and use 25 bins to roughly match the original figure. Use good axis labels.
+e.  (Challenge, optional) Instead of excluding continent `EA` by name in your analysis (in part 2), modify your code to determine from the data which continents had species that went extinct in the Pleistocene and only include those continents.
+
+```{r}
+#3a
+mammal <- read_tsv(here("data_raw/mammal-size-data-clean.txt"),            # import txt file as data frame
+                   na = c("-999.0", "-999", "spp.", "sp.")) # change values to NAs
+
+#3b
+mammal %>% 
+  filter(status == "extant" | status == "extinct",  # filter for status extant or extinct
+         continent != "Insular",          #  and continents other than insular,
+         continent != "Oceanic",          #  oceanic, and EA
+         continent != "EA") %>% 
+  ggplot(aes(mass, fill = status)) +      # data to plot, color for both statuses
+  geom_histogram(bins = 25) +             # histogram with 25 bins
+  scale_x_log10() +                       # change x axis to log scale
+  facet_wrap(~continent) +                # subplot for each continent
+  labs(x = "Log Mass (g)",                # rename axes
+       y = "Number of Species Present in the Late Pleistocene")
+  
+
+#3c
+mammal %>% 
+  filter(status == "extant" | status == "extinct",        # filter for status extant or extinct,
+         continent == "NA" | continent == "SA",           #  continent NA or SA, and
+         order == "Carnivora" | order == "Xenarthra") %>% #  order carnivora or xenarthra
+  ggplot(aes(mass, fill = status)) +          # data to plot
+  geom_histogram(bins = 19) +                 # histogram with 19 bins
+  scale_x_log10() +                           # change x axis to log scale
+  facet_wrap(~continent ~order) +             # subplot for combination of continents and orders
+  labs(x = "Log Mass (g)",                    # rename axes
+       y = "Number of Species Present in the Late Pleistocene")
+
+#3d
+mammal %>% 
+  filter(status == "extant" | status == "extinct"   # filter for status extant, extinct,
+         | status == "historical",                  #  or historical and continent AUS
+         continent == "AUS") %>% 
+  ggplot(aes(mass, fill = status)) +                # data to plot
+  geom_histogram(bins = 25) +                       # histogram with 25 bins
+  scale_x_log10() +                                 # change x axis to log scale
+  labs(x = "Log Mass (g)", y = "Number of Species") # rename axes
+
+
+#3e
+extinct <- mammal %>%              # name new data frame
+  filter(status == "extinct") %>%  # remove rows without status = extinct
+  distinct(continent)              # return list of unique values in continents col.
+extinct
+
+mammal %>%                               # join original df with list of continents that had
+  inner_join(extinct, by = "continent")  #  extinctions, keeping only rows that match the list
+```
+
+### 4. Palmer Penguins (35 points)
+
+In this question, we are going to take some raw data and recreate a clean dataset. This is from the `palmerpenguins` R package, which has body size measurements from 3 species of Antarctic penguins from 2007-2009. First, we need to load in the package and take a look at the clean version of the data that we are trying to recreate.
+
+```{r}
+library(palmerpenguins)
+
+# because the data is from a package, it doesnt automatically show up in our environment unless with use the assignment arrow to place it there
+penguins <- penguins
+head(penguins)
+```
+
+Now, let's bring in the original 3 datasets that were used to create this cleaned version (`penguins`)
+
+```{r}
+# Adelie penguin data from: https://doi.org/10.6073/pasta/abc50eed9138b75f54eaada0841b9b86
+url_adelie <- "https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-pal.219.3&entityid=002f3893385f710df69eeebe893144ff"
+adelie <- read_csv(url_adelie)
+
+# Gentoo penguin data from: https://doi.org/10.6073/pasta/2b1cff60f81640f182433d23e68541ce
+url_gentoo <- "https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-pal.220.3&entityid=e03b43c924f226486f2f0ab6709d2381"
+gentoo <- read_csv(url_gentoo)
+
+# Chinstrap penguin data from: https://doi.org/10.6073/pasta/409c808f8fc9899d02401bdb04580af7
+url_chinstrap <- "https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-pal.221.2&entityid=fe853aa8f7a59aa84cdd3197619ef462"
+chinstrap <- read_csv(url_chinstrap)
+```
+
+#### Problem breakdown
+
+(both a and b are graded for completion, not accuracy)
+
+a.  Start by breaking down the problem into plain language. This stage shouldn't include any specific functions but is allowing you to talk through the steps conceptually.
+
+b.  Make some predictions about the order in which you will want to accomplish this task, including which functions you will likely be using.
+
+```{r}
+#4a
+# Merge all data frames into one
+# Select relevant columns
+# Rename columns
+# Pull year out of Date Egg into new col.
+# Change case in Sex col.
+# Fix any NA not represented by "NA"
+# Pull out common name in species col.
+
+#4b
+# Merge data frames
+# Rename columns
+# Change species name to common
+# Fix NAs
+# Change case in sex
+# Pull year out of date column
+# Select relevant columns
+```
+
+#### Coding
+
+c.  Recreate the clean dataset (`penguins`). Below are some tips (in no particular order) that will likely be helpful along the way
+
+    -   There is one instance in the sex column of one of the species where an unknown sex is marked with a `.` instead of `NA`
+    -   You do not need to match up data types exactly (character and factors are mostly interchangeable; same with integer, numeric, and double)
+    -   The year column is derived from the `Date Egg` column in the original 3 dataframes
+    -   Culmen is basically a fancy word for a bird's bill
+    -   I've taught you multiple ways to pull out a specific part of a character string, and you can choose whichever you prefer. Additional helpful hints are that the regex for extracting the first word in a string is `'\\w*'`; there is also a function called `word()` that is part of the `stringr` package.
+
+You will know that you have successfully completed the task at hand if you run the code `setdiff(your_clean_df, penguins)`, and the result has 0 rows.
+
+The `setdiff()` function takes 2 dataframes and looks for any differences. The output is a dataframe with rows that do not match up. If you have 0 rows that don't match, that means all rows do match!
+
+```{r}
+# merge separate data frames into one
+pengu <- adelie %>% 
+  full_join(chinstrap) %>% 
+  full_join(gentoo)
+
+pengu <- pengu %>% 
+  # rename relevant columns
+  rename(species = Species,
+         island = Island,
+         bill_length_mm = 'Culmen Length (mm)',
+         bill_depth_mm = 'Culmen Depth (mm)',
+         flipper_length_mm = 'Flipper Length (mm)',
+         body_mass_g = 'Body Mass (g)',
+         sex = Sex,
+         year = "Date Egg") %>% 
+  # fix species, NA in sex, sex case, and year
+  mutate(species = str_replace(species, "\\s.*$", ""),
+         sex = na_if(sex, "."),
+         sex = tolower(sex),
+         year = year(year)) %>% 
+  # select relevant data
+  select(species, island, bill_length_mm,
+         bill_depth_mm, flipper_length_mm,
+         body_mass_g, sex, year)
+
+pengu
+
+setdiff(pengu, penguins)
+```
+
+### 5. Preparing for Next Week
+
+This is not graded homework, but I want us to be as prepared for next week as we can be.
+
+That means that I would like you to have R, RStudio, and git installed on your personal computer and you have registered for a GitHub account (If you haven't done any of this before, it might be a bit of a slog).
+
+To do so, I would like you to follow the steps in Chapters 4, 5, and 6 from [Happy git with R](https://happygitwithr.com/install-intro). D2L will have some additional resources in next week's module description, as well. Please don't hesitate to reach out if you're getting stuck!

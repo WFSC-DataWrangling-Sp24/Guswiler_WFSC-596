@@ -1,0 +1,226 @@
+---
+title: "Assignment 9"
+author: "Olivia Guswiler"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Assignment Details
+
+### Purpose
+
+The goal of this assignment is to practice problem decomposition and some best practices in reproducibility .
+
+### Task
+
+Write R code to successfully answer each question below.
+
+### Criteria for Success
+
+-   Code is within the provided code chunks or new code chunks are created where necessary
+-   Code chunks run without errors
+-   Code chunks have brief comments indicating which code is answering which part of the question
+-   Code will be assessed as follows:
+    -   Produces the correct answer using the requested approach: 100%
+    -   Generally uses the right approach, but a minor mistake results in an incorrect answer: 90%
+    -   Attempts to solve the problem and makes some progress using the core concept, but returns the wrong answer and does not demonstrate comfort with the core concept: 50%
+    -   Answer demonstrates a lack of understanding of the core concept: 0%
+-   Any questions requiring written answers are answered with sufficient detail
+
+### Due Date
+
+March 25 at midnight MST
+
+# Assignment Exercises
+
+For many of the exercises in this week's assignment, we will actually be using a lot of the code that you have already written for Assignment 8. This time, however, all of your file paths will be different...
+
+### 1. Set-Up (10 pts)
+
+Now that we are working outside of Posit Cloud, we will need to first *install* our packages onto your computer before we can load them with the `library()` function.
+
+We use the `install.packages()` function to download the package from the internet and create a local copy. Unlike with the `library()` function, the package name needs to be inside quotation marks.
+
+Insert a code chunk and (a) install and (b) load `palmerpenguins`. Since we already installed the `tidyverse` during the lesson, you do not need to install it again. However, you do need to *load* it again.
+
+Once you've installed `palmerpenguins`, comment out that line of code.
+
+If you haven't already, make sure you are working in an R Project. Your project should have sub-directories for raw data, clean data, output, docs, and scripts. The naming convention for these folders is up to you.
+
+```{r}
+library(tidyverse)
+
+# install.packages("palmerpenguins")
+library(palmerpenguins)
+penguins <- penguins
+
+# installing {here} for use in .Rmd files to aid in navigating sub-directories
+# install.packages("here")
+library(here)
+```
+
+### 2. Portal Data Paths Review (20 points)
+
+For this question, we are going to be using some of the code you've already written for Assignment 8, Question 2.
+
+Click on the links below to download all 3 of the Portal files: surveys, species, and plots.
+
+Then, move those three files from your Downloads folder into your equivalent of the raw data folder (yours might have a slightly different name). This assignment file should be in your scripts folder.
+
+Now, let's begin to code!
+
+a.  Load the 3 dataframes (surveys, species, plots) into R using `read_csv()`. Make sure your paths are *relative*.
+b.  Copy the answers from Week 8 Assignment, Questions 2d-f, into the code chunk below.
+c.  Save the output of the code from 2d as a new dataframe. Then, save that resulting dataframe as a csv file in the clean data sub-directory using the `write_csv()` function.
+d.  Save the ggplots from 2e and 2f into the outputs folder using the `ggsave()` function.
+
+```{r}
+#2a
+getwd()
+
+# download the files to daw_raw folder in project
+# surveys.csv
+download.file(url = "https://ndownloader.figshare.com/files/2292172",
+              destfile = here('data_raw/surveys.csv'))
+
+#species.csv
+download.file(url = "https://ndownloader.figshare.com/files/3299483",
+              destfile = here('data_raw/species.csv'))
+
+# plots.csv
+download.file(url = "https://ndownloader.figshare.com/files/3299474",
+              destfile = here('data_raw/plots.csv'))
+
+# load data into workspace
+surveys <- read_csv(here("data_raw/surveys.csv"))
+species <- read_csv(here("data_raw/species.csv"))
+plots <- read_csv(here("data_raw/plots.csv"))
+
+#2c
+dipodomys_mass <- surveys %>% 
+  inner_join(species, by = "species_id") %>%    # join surveys with species
+  inner_join(plots, by = "plot_id") %>%         #  and plot_id data frames
+  filter(genus == "Dipodomys") %>%              # filter for rows with genus = Dipodomys
+  select(year, genus, species, weight, plot_type) # select relevant data
+
+write_csv(dipodomys_mass,                           # save data frame to clean_data
+          file = here("data_clean/dipodomys_mass.csv"))
+
+#2d
+ggplot(surveys, aes(weight, hindfoot_length, # describe data to plot
+                    color = species_id)) +   # diff color for each species
+  geom_point() +                             # scatter plot
+  scale_x_log10() +                          # change x axis to log scale
+  labs(x = "Log Weight (g)",                 # change axes labels
+       y = "Hindfoot Length (mm)")
+
+ggsave(here("outputs/HFL_v_Mass.png"))       # save plot to outputs
+
+
+surveys %>% 
+  drop_na(weight) %>%                          # remove rows without weight data
+  ggplot(aes(weight)) +                        # describe data to plot
+  geom_histogram() +                           # histogram
+  facet_wrap(~species_id, scales = "free_y") + # subplots for each species, y-axis scale free
+  labs(x = "Weight (g)",                       # change axes labels
+       y = "Number of Individuals")
+
+ggsave(here("outputs/SubplotIndividuals_v_Mass.png"))  # save plot to outputs
+```
+
+### 3. Palmer Penguins and Path Files (20 points)
+
+Like in Question 2 above, we will be recreating Question 4 from Week 8's assignment but within our own R Project. As a reminder, this is the question that used the `palmerpenguins` data.
+
+a.  The code chunk below uses the `download.file()` function to go to a specific URL and then download the data at that URL. The location where the file is downloaded to is set by the `destfile` argument. Modify the path in the `destfile` argument for all three species datasets so that they are downloaded directly into your raw data folder.
+
+```{r}
+#3a
+
+# Adelie penguin data
+download.file(url = "https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-pal.219.3&entityid=002f3893385f710df69eeebe893144ff",
+              destfile = here("data_raw/adelie.csv"))
+
+# Gentoo penguin data
+download.file(url = "https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-pal.220.3&entityid=e03b43c924f226486f2f0ab6709d2381",
+              destfile = here("data_raw/gentoo.csv"))
+
+# Chinstrap penguin data 
+download.file(url = "https://portal.edirepository.org/nis/dataviewer?packageid=knb-lter-pal.221.2&entityid=fe853aa8f7a59aa84cdd3197619ef462",
+              destfile = here("data_raw/chinstrap.csv"))
+```
+
+b.  Copy and then run the code that you wrote to combine the three above datasets and have the output match the `penguins` dataframe from the `palmerpenguins` dataframe.
+c.  Run the `setdiff()` function to make sure that your code worked (it shouldn't have any issues, but it is good to check!)
+d.  Save your version of the cleaned penguins data into your clean data folder.
+
+```{r}
+#3b
+
+# read data into environment
+penguins <- penguins
+adelie <- read_csv(here("data_raw/adelie.csv"))
+chinstrap <- read_csv(here("data_raw/chinstrap.csv"))
+gentoo <- read_csv(here("data_raw/gentoo.csv"))
+
+# merge separate data frames into one
+pengu <- adelie %>% 
+  full_join(chinstrap) %>% 
+  full_join(gentoo)
+
+pengu <- pengu %>% 
+  # rename relevant columns
+  rename(species = Species,
+         island = Island,
+         bill_length_mm = 'Culmen Length (mm)',
+         bill_depth_mm = 'Culmen Depth (mm)',
+         flipper_length_mm = 'Flipper Length (mm)',
+         body_mass_g = 'Body Mass (g)',
+         sex = Sex,
+         year = "Date Egg") %>% 
+  # fix species, NA in sex, sex case, and year
+  mutate(species = str_replace(species, "\\s.*$", ""),
+         sex = na_if(sex, "."),
+         sex = tolower(sex),
+         year = year(year)) %>% 
+  # select relevant data
+  select(species, island, bill_length_mm,
+         bill_depth_mm, flipper_length_mm,
+         body_mass_g, sex, year)
+
+#3c
+setdiff(pengu, penguins)
+
+#3d
+write_csv(pengu, here("data_clean/pengu.csv"))
+```
+
+### 4. Add Version Control: Together in Class (15 points)
+
+Add version control to this RProject that you are working in. We will do this together in class.
+
+To get full points for this question, you will need to commit all of the current subdirectories and files to GitHub. This is particularly important, because I will be grading your assignment through the GitHub repo!
+
+### 5. Create a Final Project Repository and RProject (35 points)
+
+Follow the directions to create a new repository on GitHub in our class organization. This will be the repository that you will use for Final Project in the course.
+
+Connect this GitHub repo with an RStudio Project, as we demonstrated in class. Once you have the R Project set up, add your sub-directories.
+
+In D2L, you will find a file with a few questions about what dataset you are planning to use. If you don't have one in mind yet, don't worry! I'll provide a list with some options for you to explore.
+
+Download the file from D2L and place it in the documents folder of your R Project.
+
+Complete the questions in that document. Save the changes, commit the changes, and push the changes to GitHub.
+
+## Turning in Your Assignment
+
+The way that you will be turning in assignments from now on is going to change now that we are no longer working in Posit Cloud.
+
+Instead of turning in a PDF of your assignment, you will now be giving me a link to your GitHub repository. We will make sure all the permissions are take care of so that I have access.
+
+It might be a good idea (though is not required) to add a bit of information in your README file for the GitHub repo to tell me where to look to find your assignment for any given week.

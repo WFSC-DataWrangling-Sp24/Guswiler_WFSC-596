@@ -1,0 +1,248 @@
+---
+title: 'Week 8: Solving Bigger Problems'
+author: "Olivia Guswiler"
+date: "`r Sys.Date()`"
+output: pdf_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Solving Bigger Problems
+
+This week, we are going to take a break learning commands to talk about
+general approaches to programming.
+
+Real computational tasks tend to be complicated. To accomplish them, you
+need to **think before you code**.
+
+## Set Up
+
+For this lesson and the assignment, we will be using a number of
+datasets, including the 3 datasets with Portal data that we are already
+somewhat familiar with.
+
+Let's read in the `tidyverse` and download our datasets to get started.
+
+```{r}
+# packages
+library(tidyverse)
+library(here)
+
+# data
+download.file("https://ndownloader.figshare.com/files/2292172",
+  here("data_raw/surveys.csv"))
+download.file("https://ndownloader.figshare.com/files/3299474",
+  here("data_raw/plots.csv"))
+download.file("https://ndownloader.figshare.com/files/3299483",
+  here("data_raw/species.csv"))
+download.file("https://datacarpentry.org/semester-biology/data/mammal-size-data-clean.tsv",
+  here("data_raw/mammal-size-data-clean.txt"))
+```
+
+## Problem Decomposition steps
+
+One great way to work through the steps of coding is to break down the
+problem into smaller, more manageable chunks. This can also help you get
+an idea of the order in which to approach the coding.
+
+Here are some good guidelines:
+
+1.  Understand the problem
+    a.  Restate the problem in your own words
+    b.  Determine the inputs and outputs
+    c.  Ask for clarification
+2.  Break the problem down
+    a.  Write down the pieces, on paper or as comments in a file
+    b.  Break complicated pieces down until all pieces are small and
+        manageable
+3.  Code one small piece at a time
+    a.  Test it on it's own
+    b.  Fix any problems before proceeding
+
+### Let's Practice!
+
+Take a look at Question 4 in the assignment. Spend a few minutes reading
+through the question, restate the question in your on words, and then
+break down the steps.
+
+### Iteration
+
+As you've probably discovered by now, programming requires a lot of
+iteration to get to code to do exactly what you want it to do and
+produce the output you are looking for.
+
+When writing more and more complex code, it can help to start simple and
+build the code up.
+
+> Write a simple version -\> Make sure it works -\> Make sure you
+> understand it -\> Modify it to make it more complicated -\> Repeat
+> until finished
+
+Perhaps we want to calculate the average hindfoot length in cm for each
+rodent species at Portal.
+
+Let's start by breaking down the problem. Then, we can add one piece at
+a time
+
+```{r}
+# join species and surveys data
+# filter for rodent species only
+# convert hindfoot length to cm
+# group data by species
+# summary data of hindfoot length
+
+surveys <- read_csv(here("data_raw/surveys.csv"))
+species <- read_csv(here("data_raw/species.csv"))
+
+avg_rodent_hf_cm <- surveys %>% 
+  inner_join(species, join_by(species_id)) %>%   # join surveys with species
+  filter(taxa == "Rodent") %>%                   # only pull rodent captures
+  mutate(hindfoot_cm = hindfoot_length / 10) %>% # convert mm to cm
+  group_by(species_id) %>%                       # want an average for each species
+  summarise(mean_hf = mean(hindfoot_cm, na.rm = TRUE)) # calculate mean for groupings
+avg_rodent_hf_cm
+
+
+mean_rodent_hf_cm <- surveys %>% 
+  inner_join(species, by = "species_id") %>% 
+  filter(taxa == "Rodent") %>% 
+  mutate(hindfoot_cm = hindfoot_length / 10) %>% 
+  group_by(species_id) %>% 
+  summarise(mean_hf = mean(hindfoot_cm, na.rm = TRUE))
+mean_rodent_hf_cm
+```
+
+## Debugging
+
+A major part of the iterative process of coding is fixing errors that
+come up! You've already had quite a bit of practice with this working on
+your assignments, but let's talk about some general strategies together.
+
+1.  Be a scientist.
+
+-   Hypothesize about what is wrong.
+-   Make one change that is expected to fix error.
+-   Check if change worked/fixed error.
+
+2.  **Do not change something without a reason.**
+
+Develop hypotheses! - See where the code failed. - Read the error
+message. - Observe what the code is doing. - Look at the current state
+of the environment. This gives you a current snapshot of what is going
+on - Talk through the code - [Rubber duck
+programming](https://en.wikipedia.org/wiki/Rubber_duck_debugging)
+
+3.  Run the code line by line checking each step.
+4.  Use generative AI (e.g., ChatGPT)
+
+### Example
+
+Below, we have a code chunk with some code that is mean to summarize
+some of the Portal data and then plot it. However, as you'll see when
+you try to run the code, we have some errors.
+
+First, copy the code into a new code chunk below. Spend a few minutes
+working through this code chunk to debug it. Utilize some of the
+strategies above.
+
+Code chunk to debug: leave as is for reference.
+
+```{r eval=FALSE}
+surveys <- read_csv(here('data_raw/surveys.csv'))
+species <- read_csv(here('data_raw/species.csv'))
+
+do_counts_by_year <- survey %>% 
+  filter(species = "DO") %>% 
+  group_by(year)
+  summarize(count = n())
+
+ggplot(do_count_by_year, aes(x = year, y = count)) %>% 
+  geom_point() +
+  geom_line()
+  labs(x = "Year", y = "Count") +
+  theme_bw()
+```
+
+Insert a code chunk here. Copy the code from above and work to debug it.
+
+```{r}
+do_counts_by_year <- surveys %>% # missing s at end of surveys
+  filter(species_id == "DO") %>% # no "species" col. is "species_id, should be ==, not =
+  group_by(year) %>%             # missing pipe
+  summarize(count = n())
+do_counts_by_year
+
+ggplot(do_counts_by_year, aes(x = year, y = count)) + # change from pipe to +, incorrectly spelled data frame
+  geom_point() +
+  geom_line() +                                       # missing +
+  labs(x = "Year", y = "Count") +
+  theme_bw()
+```
+
+Now, let's copy the code into ChatGPT and see what it finds and what it
+gets wrong.
+
+## Finding Help
+
+In this class, I've provided the instructor versions of the lessons in
+class for you to have a reference sheets. They are super helpful, but
+they won't always have exactly what you need, especially when you are
+working with your own datasets.
+
+The good news is that there is help! In fact, professional programmers
+use Google regularly; I am constantly googling how to acheive certain
+tasks, including for the lessons and assignments in this class!
+
+There is a bit of an art to learning how to search, read, and apply
+online help. Let's talk through a few tips that you might find helpful.
+
+### In the Search:
+
+-   Get the vocabulary right
+-   Avoid extra words
+-   Specify the programming language (and specify `tidyverse` if that
+    matters to you)
+
+### Results:
+
+**Help sites**
+
+-   Read the question
+-   Look at the setup
+-   Check the age (when was it answered?)
+-   Check the top 2-3 answers
+-   Glance at the comments
+-   Test & modify the example
+    -   But don't blindly paste things you don't understand
+    -   Reputation can help - e.g., StackOverflow w/lots of positive
+        votes
+
+**Blog posts**
+
+-   Read the question
+-   Look at the setup
+-   Use `Find` (`Ctrl` + `F` or `Cmd` + `F`)
+
+**Documentation**
+
+-   Use `Find` (`Ctrl` + `F` or `Cmd` + `F`)
+-   Focus on the examples
+
+### Testing and modifying answers
+
+Often, we won't be able to tell right away if the code provided in the
+answer will work for our specific data or situation. We always need to
+test it out.
+
+First, if given a reproducible examples (reprex), meaning is has data
+and code you can copy and paste to run, do so! This can help with
+understanding what the code is doing and whether or not it will work in
+your case.
+
+From there, you can begin to modify the example to include your data and
+specific values.

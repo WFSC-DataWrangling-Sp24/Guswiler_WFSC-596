@@ -1,0 +1,335 @@
+---
+title: "Week 5 Assignment"
+author: "Olivia Guswiler"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Week 5 Assignment
+
+# Assignment Exercises
+
+### Set-up
+
+Load the packages we will need. You can either load all of them individually (`readr`, `dplyr`, `ggplot2`) or load the `tidyverse` package.
+
+```{r, include=FALSE}
+library(tidyverse)
+library(here)
+```
+
+### 1. Acacia and Ants (20 pts)
+
+Read in the acacia data frame by running the following code chunk.
+
+```{r, include=FALSE}
+acacia <- read_tsv(here("data_raw/ACACIA_DREPANOLOBIUM_SURVEY.txt"), na = c("", "dead"))
+```
+
+a.  Make a scatter plot with `CIRC` on the x axis and `AXIS1` (the maximum canopy width) on the y axis. Label the x axis "Circumference" and the y axis "Canopy Diameter".
+b.  The same plot as (a), but with both axes scaled logarithmically (using `scale_x_log10` and `scale_y_log10`).
+c.  The same plot as (a), but with points colored based on the `ANT` column (the species of ant symbiont living with the acacia)
+d.  The same plot as (c), but instead of different colors show different species of ant (values of `ANT`) each in a separate subplot.
+e.  The same plot as (d) but add a simple model of the data by adding `geom_smooth`.
+
+```{r}
+#1a
+ggplot(acacia, aes(CIRC, AXIS1)) +    # define data for axes
+  geom_point() +                      # plot type = scatter
+  labs(x = "Circumference (cm)",      # label axes
+       y = "Canopy Diameter (m)")
+
+#1b
+ggplot(acacia, aes(CIRC, AXIS1)) +
+  geom_point() +
+    labs(x = "Log Circumference (cm)",
+         y = "Log Canopy Diameter (m)") +
+  scale_x_log10() +                  # adjust scale of axes
+  scale_y_log10()
+
+#1c
+acacia %>%                         # define data
+  filter(!is.na(ANT)) %>%          # remove rows where ANT = NA
+  ggplot(aes(CIRC, AXIS1,
+             color = ANT)) +       # color data points by var. ANT
+  geom_point() +
+  labs(x = "Circumference (cm)",
+       y = "Canopy Diameter (m)")
+
+#1d
+acacia %>%                          
+  filter(!is.na(ANT)) %>%           
+  ggplot(aes(CIRC, AXIS1)) +
+  geom_point() +
+  labs(x = "Circumference (cm)",
+       y = "Canopy Diameter (m)") +
+  facet_wrap(~ANT)                   # subplots by var. ANT
+
+#1e
+acacia %>% 
+  filter(!is.na(ANT)) %>%
+  ggplot(aes(CIRC, AXIS1)) +
+  geom_point() +
+  labs(x = "Circumference (cm)",
+       y = "Canopy Diameter (m)") +
+  facet_wrap(~ANT) +
+  geom_smooth()                      # add simple model to plots
+```
+
+### 2. Mass vs. Metabolism (20 pts)
+
+The relationship between the body size of an organism and its metabolic rate is one of the most well studied and still most controversial areas of organismal physiology. We want to graph this relationship in the [Artiodactyla](http://en.wikipedia.org/wiki/Even-toed_ungulate) using a subset of data from a large compilation of body size data ([Savage et al. 2004](https://doi.org/10.1111/j.0269-8463.2004.00856.x)). Run this code chunk to get started.
+
+```{r, include=FALSE}
+size_mr_data <- data.frame(
+  body_mass = c(32000, 37800, 347000, 4200, 196500, 100000,
+    4290, 32000, 65000, 69125, 9600, 133300, 150000, 407000,
+    115000, 67000,325000, 21500, 58588, 65320, 85000, 135000,
+    20500, 1613, 1618),
+  metabolic_rate = c(49.984, 51.981, 306.770, 10.075, 230.073, 
+    148.949, 11.966, 46.414, 123.287, 106.663, 20.619, 180.150, 
+    200.830, 224.779, 148.940, 112.430, 286.847, 46.347,
+    142.863, 106.670, 119.660, 104.150, 33.165, 4.900, 4.865),
+  family = c("Antilocapridae", "Antilocapridae", "Bovidae",
+    "Bovidae", "Bovidae", "Bovidae", "Bovidae", "Bovidae",
+    "Bovidae", "Bovidae", "Bovidae", "Bovidae", "Bovidae",
+    "Camelidae", "Camelidae", "Canidae", "Cervidae",
+    "Cervidae", "Cervidae", "Cervidae", "Cervidae", "Suidae",
+    "Tayassuidae", "Tragulidae", "Tragulidae"))
+```
+
+Make the following plots with appropriate axis labels:
+
+a.  A plot of body mass vs. metabolic rate
+b.  A plot of body mass vs. metabolic rate, with log10 scaled axes (this stretches the axis, but keeps the numbers on the original scale), and the point size set to 3.
+c.  The same plot as (b), but with the different families indicated using color.
+d.  The same plot as (b), but with the different families each in their own subplot.
+
+```{r}
+#2a
+ggplot(size_mr_data, aes(body_mass, metabolic_rate)) + # define data
+  geom_point() +                                       # plot = scatter
+  labs(x = "Body Mass (g)", y = "Basal Metabolic Rate (W)")          # label axes
+
+#2b
+ggplot(size_mr_data, aes(body_mass, metabolic_rate)) +
+  geom_point(size = 3) +                               # define point size
+  labs(x = "Log Body Mass (g)",
+       y = "Log Basal Metabolic Rate (W)") +
+  scale_x_log10() +                                    # scale axes
+  scale_y_log10()
+
+#2c
+ggplot(size_mr_data, aes(body_mass, metabolic_rate,
+                         color = family)) +            # color data by var. family
+  geom_point(size = 3) +
+  labs(x = "Log Body Mass (g)",
+       y = "Log Basal Metabolic Rate (W)") +
+  scale_x_log10() +
+  scale_y_log10()
+
+#2d
+ggplot(size_mr_data, aes(body_mass, metabolic_rate)) +
+  geom_point(size = 3) +
+  labs(x = "Log Body Mass (g)",
+       y = "Log Basal Metabolic Rate (W)") +
+  scale_x_log10() +
+  scale_y_log10() +
+  facet_wrap(~family)                                  # subplots by var. family
+```
+
+### 3. Acacia and Ants Histograms (20 pts)
+
+In this exercise, we will be making a number of different histograms with the `acacia` dataset.
+
+a.  Make a bar plot of the number of acacia with each mutualist ant species (using the `ANT` column).
+b.  Make a histogram of the height of acacia (using the `HEIGHT` column). Label the x axis "Height (m)" and the y axis "Number of Acacia".
+c.  Make a plot that shows histograms of both `AXIS1` and `AXIS2`. Due to the way the data is structured, you'll need to add a 2nd geom_histogram() layer that specifies a new aesthetic. To make it possible to see both sets of bars you'll need to make them transparent with the optional argument `alpha = 0.3`. Set the color for `AXIS1` to "red" and `AXIS2` to "black" using the `fill` argument. Label the x axis "Canopy Diameter (m)" and the y axis "Number of Acacia".
+d.  Use `facet_wrap()` to make the same plot as (c) but with one subplot for each treatment. Set the number of bins in the histogram to 10.
+
+```{r}
+#3a
+ggplot(acacia, aes(ANT)) +        # define data
+  geom_bar()                      # plot = bar
+
+#3b
+ggplot(acacia, aes(HEIGHT)) +
+  geom_histogram() +              # plot = histogram
+  labs(x = "Height (m)",          # label axes
+       y = "Number of Acacia")
+
+#3c
+ggplot(acacia) +
+  geom_histogram(aes(AXIS1),                         # plot hist for AXIS1 with color
+                 alpha = 0.3, fill = "red",          #  and line aesthetics
+                 color = "red", linewidth = 0.1) +
+  geom_histogram(aes(AXIS2),
+                 alpha = 0.3, fill = "black",        # plot hist for AXIS2 with color
+                 color = "black", linewidth = 0.1) + #  and line aesthetics
+  labs(x = "Canopy Diameter (m)",
+       y = "Number of Acacia")
+
+#3d
+ggplot(acacia) +
+  geom_histogram(aes(AXIS1),
+                 alpha = 0.3, fill = "red",
+                 color = "red", linewidth = 0.1,
+                 bins = 10) +                      # define no. bins (AXIS1)
+  geom_histogram(aes(AXIS2),
+                 alpha = 0.3, fill = "black",
+                 color = "black", linewidth = 0.1,
+                 bins = 10) +                      # define no. bins (AXIS2)
+  labs(x = "Canopy Diameter (m)",
+       y = "Number of Acacia") +
+  facet_wrap(~TREATMENT)                           # subplots by var. TREATMENT
+```
+
+### 4. Acacia and Ants Data Manipulation (20 pts)
+
+Run the following line of code to use `read_tsv` from the `readr` package to read in the data from "TREE.txt". This line of code is using the `col_types` argument to specify the the `HEIGHT` and `AXIS_2` columns should have their data read is as the data class "double," which is like "numeric."
+
+```{r, include=FALSE}
+trees <- read_tsv(here("data_raw/TREE.txt"),
+                  col_types = list(HEIGHT = col_double(),
+                                   AXIS_2 = col_double()))
+```
+
+Now that you have the `trees` data frame, do the following:
+
+a.  Update the `trees` data frame with a new column named `canopy_area` that contains the estimated canopy area calculated as the value in the `AXIS_1` column times the value in the `AXIS_2` column. Show output of the `trees` data frame with just the `SURVEY`, `YEAR`, `SITE`, and `canopy_area` columns.
+b.  Make a scatter plot with `canopy_area` on the x axis and `HEIGHT` on the y axis. Color the points by `TREATMENT` and plot the points for each value in the `SPECIES` column in a separate subplot. Label the x axis "Canopy Area (m)" and the y axis "Height (m)". Make the point size 2.
+c.  That's a big outlier in the plot from (b). 50 by 50 meters is a little too big for a real Acacia, so filter the data to remove any values for `AXIS_1` and `AXIS_2` that are over 20 and update the data frame. Then remake the graph.
+d.  Using the data without the outlier (i.e., the data generated in (c)), find out how the abundance of each species has been changing through time. Use `group_by`, `summarize`, and `n` to make a data frame with `YEAR`, `SPECIES`, and an `abundance` column that has the number of individuals in each species in each year. Print out this data frame.
+e.  Using the data frame generated in (d), make a line plot with points (by using `geom_line` in addition to `geom_point`) with `YEAR` on the x axis and `abundance` on the y axis with one subplot per species. To let you seen each trend clearly let the scale for the y axis vary among plots by adding `scales = "free_y"` as an optional argument to `facet_wrap`.
+
+```{r}
+#4a
+trees <- mutate(trees, canopy_area = AXIS_1 * AXIS_2) # create canopy_area var.
+select(trees, SURVEY, YEAR, SITE, canopy_area)        # select desired data for output
+
+#4b
+ggplot(trees, aes(canopy_area, HEIGHT,      # define data
+                  color = TREATMENT)) +     # color data points by var. TREATMENT
+  geom_point(size = 2) +                    # plot = scatter, set point size
+  labs(x = "Canopy Area (m)",               # label axes
+       y = "Height (m)") +
+  facet_wrap(~SPECIES)                      # subplots by var. SPECIES
+
+#4c
+trees <- filter(trees, canopy_area < 20)    # filter for rows w/ canopy_area < 20
+ggplot(trees, aes(canopy_area, HEIGHT,      
+                  color = TREATMENT)) +
+  geom_point(size = 2) +
+  labs(x = "Canopy Area (m)",
+       y = "Height (m)") +
+  facet_wrap(~SPECIES)
+
+#4d
+trees_ab <- trees %>%             # create new dataframe, define data
+  group_by(YEAR, SPECIES) %>%     # group data by year and species
+  summarise(abundance = n())      # in new col. calculate abundance by groups
+trees_ab                          # print new dataframe
+
+#4e
+ggplot(trees_ab, aes(YEAR, abundance)) +   # define data
+  geom_point() +                           # plot = scatter 
+  geom_line() +                            # add overlay plot = line
+  facet_wrap(~SPECIES, scales = "free_y")  # subplots by var. SPECIES, allow y-axis                                            #  vary between indv. subplots
+```
+
+### 5. Adult vs. Newborn Size (20 pts)
+
+Larger organisms have larger offspring. We want to explore the form of this relationship in mammals. First, read in the data frame. This code uses a handy function called `rename` from the `tidyverse` to rename columns.
+
+```{r, include=FALSE}
+# download the file
+download.file("https://esapubs.org/archive/ecol/E084/093/Mammal_lifehistories_v2.txt", here("data_raw/Mammal_lifehistories_v2.txt"))
+
+# read the file
+mammal_histories <- read_tsv(here("data_raw/Mammal_lifehistories_v2.txt"), 
+                             na = c("-999", "-999.00")) %>% 
+  # rename columns names for easier use
+  rename(mass_g = `mass(g)`, 
+         gestation_mo = `gestation(mo)`,
+         newborn_g = `newborn(g)`,
+         weaning_mo = `weaning(mo)`,
+         wean_mass_g = `wean mass(g)`,
+         AFR_mo = `AFR(mo)`,
+         max_life_mo = `max. life(mo)`,
+         litter_size = `litter size`,
+         litters_per_year = `litters/year`)
+```
+
+a.  Graph adult mass vs. newborn mass. Label the axes with clearer labels than the column names.
+b.  It looks like there's a regular pattern here, but it's definitely not linear. Let's see if log-transformation straightens it out. Graph adult mass vs. newborn mass, with both axes scaled logarithmically. Label the axes.
+c.  This looks like a pretty regular pattern, so you wonder if it varies among different groups. Graph adult mass vs. newborn mass, with both axes scaled logarithmically, and the data points colored by order. Label the axes.
+d.  Coloring the points was useful, but there are a lot of points and it's kind of hard to see what's going on with all of the orders. Use `facet_wrap` to create a subplot for each order.
+e.  Now let's visualize the relationships between the variables using a simple linear model. Create a new graph like your faceted plot, but using `geom_smooth` to fit a linear model to each order. You can do this using the optional argument `method = "lm"` in `geom_smooth`.
+
+```{r}
+#5a
+ggplot(mammal_histories, aes(mass_g, newborn_g)) +
+  geom_point() +
+  labs(x = "Adult Mass (g)",
+       y = "Newborn Mass (g)")
+
+#5b
+ggplot(mammal_histories, aes(mass_g, newborn_g)) +
+  geom_point() +
+  labs(x = "Log Adult Mass (g)",
+       y = "Log Newborn Mass (g)") +
+  scale_x_log10() +
+  scale_y_log10()
+
+#5c
+ggplot(mammal_histories, aes(mass_g, newborn_g,
+                             color = order)) +
+  geom_point() +
+  labs(x = "Log Adult Mass (g)",
+       y = "Log Newborn Mass (g)") +
+  scale_x_log10() +
+  scale_y_log10()
+
+#5d
+ggplot(mammal_histories, aes(mass_g, newborn_g)) +
+  geom_point() +
+  labs(x = "Log Adult Mass (g)",
+       y = "Log Newborn Mass (g)") +
+  scale_x_log10() +
+  scale_y_log10() +
+  facet_wrap(~order)
+
+#5e
+ggplot(mammal_histories, aes(mass_g, newborn_g)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(x = "Log Adult Mass (g)",
+       y = "Log Newborn Mass (g)") +
+  scale_x_log10() +
+  scale_y_log10() +
+  facet_wrap(~order)
+```
+
+### 6. Reflection (25 pts)
+
+Reflections are graded for completion only.
+
+Write about 5 sentences addressing *at least* one of the following questions.
+
+-   What has worked well for you in this course for you so far?
+
+*I really like the way that you've set up the notes and the use of Posit Cloud during lecture. It's very intuitive and the notes are easy to navigate and return to for reference.*
+
+-   What has been particularly challenging for you so far?
+
+*I don't feel challenged enough currently. I am definitely learning how to use features that I didn't know how to utilize previously and am becoming more efficient in R overall! I think it could be beneficial in your future classes if grad students didn't have to turn in the homework assignments, and instead had to complete small projects that incorporate a few weeks of lessons. This would be in addition to the larger project completed for the final.*
+
+-   Is there anything that I can do to help your learning in the course?
+
+*Nope, everything you're currently doing is great, other than what I mentioned above!*
+
+-   Other reflections about the content of the module that you would like to share.

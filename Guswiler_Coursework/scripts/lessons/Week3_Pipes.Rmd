@@ -1,0 +1,158 @@
+---
+title: 'Week 3: Combining Steps with Pipes'
+author: "Olivia Guswiler"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Combining Steps with Pipes
+
+Because we are starting a new session in R, we need to load in our packages again. In Posit Cloud, you often don't *actually* need to do this, but it is good practice, regardless.
+
+Load both `dplyr` and `readr`. If you need to read in the .csv files again, do so here, as well.
+
+```{r}
+library(dplyr)
+library(readr)
+library(here)
+
+species <- read_csv(here("data_raw/species.csv"))
+surveys <- read_csv(here("data_raw/surveys.csv"))
+plots <- read_csv(here("data_raw/plots.csv"))
+```
+
+## When Order Matters
+
+When we run code in a code chunk or in a script/file, R runs the code in order, from beginning to end (first line first, then the second line, and so on).
+
+Let's look at an example: Obtain the data for only DS, sorted by year, with only the year and and weight columns
+
+```{r eval = FALSE}
+# why doesn't this code work?
+ds_weight_by_year <- select(ds_data_by_year, year, weight)
+ds_data <- filter(surveys, species_id == "DS", !is.na(weight))
+ds_data_by_year <- arrange(ds_data, year)
+```
+
+Why doesn't the code above work? There are a couple reasons.
+
+-   removing the clutter of creating a lot of intermediate objects in your work space, which reduces the chance of errors caused by using the wrong input object
+
+-   makes things more human-readable (in addition to computer-readable)
+
+We can put the code in the correct order, and the code chunk with run smoothly.
+
+```{r}
+ds_data <- filter(surveys, species_id == "DS", !is.na(weight))
+ds_data_by_year <- arrange(ds_data, year)
+ds_weight_by_year <- select(ds_data_by_year, year, weight)
+```
+
+### Let's Practice!
+
+Work on Exercises 2 and 3 in the Assignment.
+
+## The pipe (`%>%` or `|>`)
+
+You'll notice that in the code above, we made a bunch on intermediate objects (`ds_data`, `ds_data_by_year`). Instead of doing that, we can use a pipe operator to chain functions together.
+
+You can think of the pipe as automatically sending the output from the first line into the next line as the input.
+
+The shortcut for typing a pipe is `Ctrl` + `Shift` + `M`
+
+Let's start with a very small example, one we probably won't actually use in our own code.
+
+```{r}
+# this is a pipe: %>%
+# read is as "then"
+
+x <- c(1, 2, 3)
+mean(x)
+```
+
+Instead of putting `x` as an argument in the `mean()` function, we could instead pipe the vector into the function.
+
+```{r}
+x %>% mean()
+```
+
+This works the same way as above; `x` becomes the first argument in the `mean()` function.
+
+If we want to add other arguments, they get added to the function call. The `mean()` function already knows that our first argument in going to be `x`.
+
+```{r}
+x = c(1, 2, 3, NA)
+mean(x)
+mean(x, na.rm = TRUE)
+
+# with a pipe
+x %>% mean(na.rm = TRUE)
+```
+
+Let's try this with some of the `dplyr` functions we have learned.
+
+```{r}
+# one pipe
+surveys %>% 
+  filter(species_id == "DS")
+
+# mutliple pipes
+# recreate intermediate steps above using pipes
+surveys %>% 
+  filter(species_id == "DS", !is.na(weight)) %>% 
+  arrange(year) %>% 
+  select(year, weight)
+
+# we need to use the assignment arrow to save the new df
+ds_weight_by_year <- surveys %>% 
+  filter(species_id == "DS", !is.na(weight)) %>% 
+  arrange(year) %>% 
+  select(year, weight)
+```
+
+### `magrittr` pipe vs. base R pipe
+
+So far, we have been using a pipe that was the first pipe created to be used in R. It is part of the `magrittr` package but automatically gets loaded when you load a package from the `tidyverse`, such as `dplyr`.
+
+This is the pipe I will continue to use in class, but there is now a "native" pipe that is automatically loaded into R. It looks like `|>`.
+
+[These pipes operate in nearly exactly the same way, and you can use either one you'd like. If you want to change to the base R pipe, you can do so: Tools -\> Global Options -\> Code -\> Use native pipe operator]{.underline}
+
+### Let's Practice
+
+Try your hand at the Portal Data Manipulation Pipes (Exercise 4 and 5).
+
+## [Placeholders]{.underline}
+
+Occassionally (not in your assignment, for the record), you will need to pipe the result of a line to something other than the first argument.
+
+To do so, we use a placeholder. This is one major difference between the 2 pipes.
+
+-   **For `%>%`, the placeholder is `.`**
+-   **For `|>`, the placeholder is `_`**
+
+This placeholder thing will only work for named arguments.
+
+We can demonstrate by fitting a linear model at the end of our `dplyr` pipeline.
+
+The `lm` function takes a formula as the first argument (which columns to use for the dependent and independent variables). The second argument tells it where the data is (our dataframe, the thing we are piping).
+
+```{r}
+# magrittr pipe
+surveys %>% 
+  filter(species_id == "DS", !is.na(weight)) %>% 
+  arrange(year) %>% 
+  select(year, weight) %>% 
+  lm(weight ~ year, data = .)
+
+# base R pipe
+surveys |> 
+  filter(species_id == "DS", !is.na(weight)) |> 
+  arrange(year) |>
+  select(year, weight) |>
+  lm(weight ~ year, data = _)
+```
