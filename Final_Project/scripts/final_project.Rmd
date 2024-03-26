@@ -1,0 +1,170 @@
+---
+title: "Guswiler_Final"
+author: "Olivia Guswiler"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setup
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+# Install required packages if you do not already have them
+# install.packages("tidyverse")
+# install.packages("here")
+
+library(tidyverse)
+library(here)
+```
+
+## Data Import
+
+Data from Ecological impact of inside/outside house cats around a suburban nature preserve ([Kays and DeWan, 2020](https://www.doi.org/10.5441/001/1.s6t84pb5)). 11 cats were tracked from May to August 1991 in Albany, NY.
+
+```{r, echo = FALSE}
+# Download data and reference files
+download.file("https://datarepository.movebank.org/bitstreams/79a0c059-a4ec-4ee9-b452-4d92f26a9527/download",
+              here("data_raw/final_project/Domestic Cats in the Albany Pine Bush, New York.csv"))
+download.file("https://datarepository.movebank.org/bitstreams/7f8103b1-5a42-4f3c-8ff0-32bc97fb22b0/download",
+              here("data_raw/final_project/Domestic Cats in the Albany Pine Bush, New York-reference-data.csv"))
+download.file("https://datarepository.movebank.org/bitstreams/5b9f3635-cb70-4171-9dc9-42ec9c8a25c0/download",
+              here("docs/final_project/Domestic_Cats_Albany_README.txt"))
+
+# Read .csv files into workspace environment, clean up column names to match README.txt file descriptions
+cats_raw <- read_csv(here("data_raw/final_project/Domestic Cats in the Albany Pine Bush, New York.csv")) %>% 
+  rename(`animal-id` =  `individual-local-identifier`,
+         `animal-taxon` = `individual-taxon-canonical-name`,
+         `tag-id` = `tag-local-identifier`)
+cats_ref <- read_csv(here("data_raw/final_project/Domestic Cats in the Albany Pine Bush, New York-reference-data.csv")) %>% 
+  rename(`deploy-off-timestamp` = `deploy-off-date`,
+         `deploy-on-timestamp` = `deploy-on-date`,)
+```
+
+Merge the data into one data frame. Many of the `cat_ref` columns hold only `NA` values, so we will exclude these before merging the data frames.
+
+```{r}
+# Identify columns whose rows are entirely `NA` values.
+na_cols <- cats_ref %>%
+  select_if(~all(is.na(.))) %>%
+  colnames()
+
+# Remove these columns.
+cats_ref <- cats_ref %>%
+  select(-one_of(na_cols))
+
+# Merge cats_raw and cats_ref data frames.
+cats_full <- cats_raw %>%
+  # Join data frames by common col names into new data frame.
+  inner_join(cats_ref) %>% 
+  # Split weather comments into new column.
+  separate(comments, into = c("comments", "weather"),
+           sep = "-", convert = TRUE) %>% 
+  # Comments left empty from weather split changed to `NA`s.
+  mutate(comments = na_if(comments, ""))
+```
+
+The column `behavioural-classification` is a bit messy, start by identifying issues.
+
+```{r}
+# Get a better look at what needs to be fixed by filtering for long strings.
+cats_full %>% 
+  select(`behavioural-classification`) %>% 
+  filter(str_length(`behavioural-classification`) > 10)
+```
+
+Observed issues:
+
+-   Repetition of strings in the same cell, most often `General:General`.
+
+-   Behavior categorized as `General` with the inclusion of another behavior.
+
+-   One instance of non-conforming value `Sleep` == `Sleeping`
+
+Decided order of operation:
+
+1.  Change `Sleep` to `Sleeping`.
+2.  Remove `General` when it is not the only content in the cell, but don't remove both if it's repeated.
+3.  Remove `:` or `-` that were associated with previously removed string, but not when it is part of a behavior classification (i.e. `Cat - Cat Interaction`).
+4.  If there are two entries, separate into different columns (`behav-class-1` and `behav-class-2`).
+5.  In `behav-class-2`, replace any strings repeated from `behav-class-1` and any `General` values with `NA` (`General` will only be in `behav-class-2` if there is another, non-`General` entry).
+6.  Recombine `behav-class-1` and `behav-class-2` into `behavioural-classification` column, retaining any `NA` values in that original column.
+
+```{r}
+cats_full <- cats_full %>%
+  # Change "Sleep" to "Sleeping" and remove first instance of "General" only in strings where it is not the only content.
+  mutate(`behavioural-classification` =
+           ifelse(`behavioural-classification` == "Sleep",
+                  "Sleeping", `behavioural-classification`),
+    `behavioural-classification` =
+           str_remove(`behavioural-classification`,
+                       "General(?=\\S)")) %>% 
+  # Remove ":" | "-" if it is the first character in a string.
+  mutate(`behavioural-classification` =
+           str_remove(`behavioural-classification`,
+                      "^[-:]+")) %>% 
+  # Separate into behav-class-1 and -2.
+  separate(`behavioural-classification`,
+           into = c('behav-class-1', 'behav-class-2'),
+           sep = "(?<!\\s)[-:](?!\\s)") %>% 
+  # Change repeated strings and "General" in behav-class-2 to `NA`.
+  mutate(`behav-class-2` = ifelse(`behav-class-2` == `behav-class-1` |
+                                    `behav-class-2` == "General",
+                                  NA, `behav-class-2`)) %>%
+  # Recombine behav-class-1 and -2 into original column
+  unite(`behavioural-classification`, `behav-class-1`, `behav-class-2`,
+        sep = ", ") %>% 
+  # Remove trailing ", NA" and replace NA strings with `NA`
+  mutate(`behavioural-classification` =
+           str_remove(`behavioural-classification`, ", NA"),
+         `behavioural-classification` =
+           ifelse(`behavioural-classification` == "NA",
+                  NA, `behavioural-classification`))
+```
+
+Remove columns containing unnecessary or repeated information.
+
+```{r}
+cats_clean <- cats_full %>%
+  select(`animal-id`, timestamp, `location-long`, `location-lat`, `behavioural-classification`, comments, weather, `animal-sex`, `animal-life-stage`, `animal-reproductive-condition`, `animal-comments`, `event-id`, `deploy-on-timestamp`, `deploy-off-timestamp`)
+
+cats_clean
+
+# Save this cleaned data for easy reference
+write_csv(cats_clean, here("data_clean/NY_cats.csv"))
+```
+
+## Looking at the Data
+
+Remove feral?
+
+Also pull unique values in behav-class
+
+Let's look at
+
+```{r}
+# Summary of behav events for each animal
+cats_clean %>%
+  count(`animal-id`, `behavioural-classification`)
+
+cats_clean %>%
+  distinct(`animal-reproductive-condition`, `animal-sex`, `animal-id`) %>% 
+  count(`animal-reproductive-condition`, `animal-sex`)
+# 3 fertile, 9 fixed
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
