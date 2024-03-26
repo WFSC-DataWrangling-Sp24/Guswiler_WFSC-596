@@ -70,6 +70,7 @@ Note: Your data set does not need to be ecological in nature if you have another
 3.  Speaking generally, what tasks will you perform with this dataset? It might include tasks that we have not yet covered how to accomplish in class, but come up with a general plan that you would like to follow.
 
     *Answer*: I will clean up the data, *try* (lol) to use `ctmm` to remake the space use maps.
+    *Answer*: I will clean up the data and use `ctmm` to remake the space use maps.
 
 4.  One of the requirements of the final project is to make some type of plot using `ggplot2` with the data. What do you plan to plot from your data?
 
