@@ -16,10 +16,10 @@ Install and load necessary packages.
 ```{r}
 # Install required packages if you do not already have them
 # install.packages("tidyverse")
-# install.packages("here")
+# install.packages("ctmm")
 
 library(tidyverse)
-library(here)
+library(ctmm)
 ```
 
 ## Data Import
@@ -29,18 +29,18 @@ Data from Ecological impact of inside/outside house cats around a suburban natur
 ```{r, echo = FALSE}
 # Download data and reference files
 download.file("https://datarepository.movebank.org/bitstreams/79a0c059-a4ec-4ee9-b452-4d92f26a9527/download",
-              here("data_raw/final_project/Domestic Cats in the Albany Pine Bush, New York.csv"))
+              "../../Guswiler_FinalProject/data_raw/Domestic Cats in the Albany Pine Bush, New York.csv")
 download.file("https://datarepository.movebank.org/bitstreams/7f8103b1-5a42-4f3c-8ff0-32bc97fb22b0/download",
-              here("data_raw/final_project/Domestic Cats in the Albany Pine Bush, New York-reference-data.csv"))
+              "../../Guswiler_FinalProject/data_raw/Domestic Cats in the Albany Pine Bush, New York-reference-data.csv")
 download.file("https://datarepository.movebank.org/bitstreams/5b9f3635-cb70-4171-9dc9-42ec9c8a25c0/download",
-              here("docs/final_project/Domestic_Cats_Albany_README.txt"))
+              "../../Guswiler_FinalProject/documents/Domestic_Cats_Albany_README.txt")
 
 # Read .csv files into workspace environment, clean up column names to match README.txt file descriptions
-cats_raw <- read_csv(here("data_raw/final_project/Domestic Cats in the Albany Pine Bush, New York.csv")) %>% 
+cats_raw <- read_csv("../../Guswiler_FinalProject/data_raw/Domestic Cats in the Albany Pine Bush, New York.csv") %>% 
   rename(`animal-id` =  `individual-local-identifier`,
          `animal-taxon` = `individual-taxon-canonical-name`,
          `tag-id` = `tag-local-identifier`)
-cats_ref <- read_csv(here("data_raw/final_project/Domestic Cats in the Albany Pine Bush, New York-reference-data.csv")) %>% 
+cats_ref <- read_csv("../../Guswiler_FinalProject/data_raw/Domestic Cats in the Albany Pine Bush, New York-reference-data.csv") %>% 
   rename(`deploy-off-timestamp` = `deploy-off-date`,
          `deploy-on-timestamp` = `deploy-on-date`,)
 ```
@@ -135,7 +135,7 @@ cats_clean <- cats_full %>%
 cats_clean
 
 # Save this cleaned data for easy reference
-write_csv(cats_clean, here("data_clean/NY_cats.csv"))
+write_csv(cats_clean, "../../Guswiler_FinalProject/data_clean/NY_cats.csv")
 ```
 
 ## Looking at the Data
@@ -156,13 +156,3 @@ cats_clean %>%
   count(`animal-reproductive-condition`, `animal-sex`)
 # 3 fertile, 9 fixed
 ```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
