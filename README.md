@@ -6,6 +6,7 @@ Contains all lessons, assignments, and associated files completed for the class.
 - data_clean: Tidy data and data summary files saved from assignments
 - data_raw: Raw data files used in lessons and assignments
 - documents: Course syllabus and image files referenced in lessons
+  - assignment_keys: Assignment answer keys obtained from Dr. Ellen Bledsoe
 - outputs: Data visualizations saved from lessons and assignments
 - scripts:
   - assignments: Rmarkdown scripts of all completed assigments
