@@ -1,0 +1,155 @@
+---
+title: "Assignment 10"
+author: "Ellen Bledsoe"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Assignment Details
+
+### Purpose
+
+The goal of this assignment is to practice writing our own functions and using them.
+
+### Task
+
+Write R code to successfully answer each question below.
+
+### Criteria for Success
+
+-   Code is within the provided code chunks or new code chunks are created where necessary
+-   Code chunks run without errors
+-   Code chunks have brief comments indicating which code is answering which part of the question
+-   Code will be assessed as follows:
+    -   Produces the correct answer using the requested approach: 100%
+    -   Generally uses the right approach, but a minor mistake results in an incorrect answer: 90%
+    -   Attempts to solve the problem and makes some progress using the core concept, but returns the wrong answer and does not demonstrate comfort with the core concept: 50%
+    -   Answer demonstrates a lack of understanding of the core concept: 0%
+-   Any questions requiring written answers are answered with sufficient detail
+
+### Due Date
+
+April 1 at midnight MST
+
+# Assignment Exercises
+
+### 1. Writing Functions (15 points)
+
+a.  Copy the following function (which converts weights in pounds to weights in grams) and replace the `________` with the variable names for the input and output. Remove the comments and run the code to add the function to your environment.
+
+    Use the function to calculate how many grams there are in 3.75 pounds.
+
+```{r}
+# convert_pounds_to_grams <- function(________) {
+#     grams = 453.6 * pounds
+#     return(________)
+# }
+```
+
+b.  Copy the following function (which converts temperatures in Fahrenheit to temperatures in Celsius) and replace the `________` with the needed commands and variable names so that the function returns the calculated value for Celsius. Remove the comments and run the code to add the function to your environment.
+
+    Use the function to calculate the temperature in Celsius if the temperature in Fahrenheit is 80°F.
+
+```{r}
+# convert_fahrenheit_to_celsius <- ________(________) {
+#     celsius = (fahrenheit - 32) * 5 / 9
+#     ________(________)
+# }
+```
+
+c.  Write a function named `double` that takes a number as input and outputs that number multiplied by 2. Run it with an input of 512.
+
+d.  Write a function named `prediction` that takes three arguments, `x`, `a`, and `b`, and returns `y` using `y = a + b * x` (like a prediction from a simple linear model). Run it with `x` = 12, `a` = 6, and `b` = 0.8.
+
+### 2. Use and Modify (15 points)
+
+The length of an organism is typically strongly correlated with its body mass. This is useful because it allows us to estimate the mass of an organism even if we only know its length. This relationship generally takes the form:
+
+> mass = a \* length\^b
+
+where the parameters `a` and `b` vary among groups. This allometric approach is regularly used to estimate the mass of dinosaurs since we cannot weigh something that is only preserved as bones.
+
+The following function estimates the mass of an organism in kg based on its length in meters for a particular set of parameter values, those for *Theropoda* (where `a` has been estimated as `0.73` and `b` has been estimated as `3.63`; [Seebacher 2001](http://www.jstor.org/stable/4524171)).
+
+```{r}
+get_mass_from_length_theropoda <- function(length){
+  mass <- 0.73 * length ^ 3.63
+  return(mass)
+}
+```
+
+a.  Use this function to print out the mass of a Theropoda that is 16 m long based on its reassembled skeleton.
+
+b.  Create a new version of this function called `get_mass_from_length()` that takes `length`, `a` and `b` as arguments and uses the following code to estimate the mass `mass <- a * length ^ b`. Use this function to estimate the mass of a *Sauropoda* (`a = 214.44`, `b = 1.46`) that is 26 m long.
+
+### Writing Functions, 2 (15 points)
+
+a.  Copy the following function below (which converts weights in pounds to weights in grams and rounds them). Replace the `________` with the variable names for the input and output. Replace `__` with a number so that by default the function will round the output to one decimal place.
+
+    Use the function to calculate how many grams there are in 4.3 pounds using the default for the number of decimal places.
+
+```{r}
+# convert_pounds_to_grams <- function(________, numdigits = __) {
+#   grams <- 453.6 * pounds
+#   rounded <- round(grams, digits = numdigits)
+#   return(________)
+# }
+```
+
+b.  Write a function called `get_height_from_weight` that takes three arguments, `weight`, `a`, and `b`, and returns an estimate of `height` using `height = a * weight ^ b` (a prediction from a power model). Give it default arguments of `a` = 12 and `b` = 0.38. There should be no default value for `weight`. Use the default argument values (by passing only the value of `weight` to the function) to calculate `height` when `weight` = 42.
+
+c.  The function in (b) assumes that the weight is provided in grams. Use the functions from (3a) and (3b) in combination to estimate the height for an animal that weighs 2 pounds using the default value for `a`, but changing the value for `b` to 0.32.
+
+### 4. Default Arguments (15 points)
+
+This is a follow up to Question 2: Use and Modify.
+
+Allowing `a` and `b` to be passed as arguments to `get_mass_from_length()` made the function more flexible, but for some types of dinosaurs we don't have specific values of `a` and `b` and so we have to use general values that can be applied to a number of different species.
+
+Rewrite your `get_mass_from length()` function from Question 2 so that its arguments have default values of `a = 39.9` and `b = 2.6` (the average values from [Seebacher 2001](http://www.jstor.org/stable/4524171)).
+
+a.  Use this function to estimate the mass of a *Sauropoda* (`a = 214.44`, `b = 1.46`) that is 22 m long (by setting `a` and `b` when calling the function).
+b.  Use this function to estimate the mass of a dinosaur from an unknown taxonomic group that is 16m long. Only pass the function `length`, not `a` and `b`, so that the default values are used.
+
+### 5. Combining Functions (20 points)
+
+This is a follow up to Question 4: Default Arguments.
+
+Measuring things using the metric system is the standard approach for scientists, but when communicating your results more broadly it may be useful to use different units (at least in some countries).
+
+Write a function called `convert_kg_to_pounds` that converts kilograms into pounds (`pounds = 2.205 * kg`).
+
+Use that function and your `get_mass_from_length()` function from Question 4 to estimate the weight, in pounds, of a 12 m long Stegosaurus with `a = 10.95` and `b = 2.64` (The estimated `a` and `b` values for *Stegosauria* from [Seebacher 2001](http://www.jstor.org/stable/4524171)).
+
+### 6. Writing Tidyverse Functions (20 points)
+
+First, load either the `tidyverse` or `ggplot2`, if you haven't already done so in this document.
+
+a.  Run the code below, then combine the vectors into a data frame named `count_data` with columns named `state`, `count`, `area`, and `site`.
+
+```{r}
+state_vector <- c("FL", "FL", "FL", "FL", "GA", "GA", "GA", "GA", "SC", "SC", "SC", "SC")
+site_vector <- c("A", "B", "C", "D", "A", "B", "C", "D", "A", "B", "C", "D")
+count_vector <- c(9, 16, 3, 10, 2, 26, 5, 8, 17, 8, 2, 6)
+area_vector <- c(3, 5, 1.9, 2.7, 2, 2.6, 6.2, 4.5, 8, 4, 1, 3)
+```
+
+b.  Write a function takes takes two arguments: (1) a data frame with a `count` column and an `area` column; and (2) a column in that data frame to color the points by. Have the function make a plot with `area` on the x-axis and `count` on the y-axis and the points colored by the column you provided as an argument. Set the size of the points to 3. Use the function to make a scatter plot of count as a function of area for the `count_data` data frame with the points colored by the `state` column.
+
+Save your plot as a .png file using `ggsave()`.
+
+c.  Use the function from (b) to make a scatter plot of count as a function of area for the `count_data` data frame with the points colored by the `site` column.
+
+Save your plot as a .png file using `ggsave()`.
+
+## Turning in Your Assignment
+
+As a reminder, the way that you will be turning in assignments has changed.
+
+Instead of turning in a PDF of your assignment, you will now be giving me a link to your GitHub repository.
+
+It might be a good idea (though is not required) to add a bit of information in your README file for the GitHub repo to tell me where to look to find your assignment for any given week.
