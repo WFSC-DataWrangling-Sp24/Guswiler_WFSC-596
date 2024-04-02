@@ -87,10 +87,10 @@ dna1 != dna2
 w > x | y > z
 
 #1h
-(x * w) %in% 13.2:13.5
+(x * w) > 13.2 & (x * w) < 13.5
 
 #1i
-masses %in% 30:50
+masses > 30 & masses < 50
 ```
 
 ### 2. If Statements (20 points)
@@ -292,18 +292,16 @@ case_when(crab_size >= 20 ~ "large",   # if crab size >= 20, size cat. = "large"
 #5d
 head(pie_crab)
 
-pie_crab <- pie_crab %>% 
+pie_crab %>% 
   mutate(.before = "air_temp",  # add new col. here
          size_category =
            if_else(size >= 20, "large", "small"))
-pie_crab
 
 #5e
-pie_crab <- pie_crab %>% 
+pie_crab %>% 
   mutate(.before = "air_temp",
          size_category3 =
            case_when(size >= 20 ~ "large",
                      size >= 10 ~ "medium",
                      size < 10 ~ "small"))
-pie_crab
 ```
