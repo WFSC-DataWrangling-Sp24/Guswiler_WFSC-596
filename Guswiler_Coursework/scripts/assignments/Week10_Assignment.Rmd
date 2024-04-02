@@ -67,15 +67,15 @@ d.  Write a function named `prediction` that takes three arguments, `x`, `a`, an
 
 ```{r}
 #1a
-convert_pounds_to_grams <- function(pounds) {
-    grams <- 453.6 * pounds
-    return(grams)
+convert_pounds_to_grams <- function(pounds) {  # name fn and assign input
+    grams <- 453.6 * pounds                    # script for what fn will perform
+    return(grams)                              # assign return object
 }
 convert_pounds_to_grams(3.75)
 
 #1b
 convert_fahrenheit_to_celsius <- function(fahrenheit) {
-   celsius <- (fahrenheit - 32) * 5 / 9
+   celsius <- (fahrenheit - 32) * 5 / 9   
    return(celsius)
 }
 convert_fahrenheit_to_celsius(80)
@@ -121,9 +121,9 @@ b.  Create a new version of this function called `get_mass_from_length()` that t
 get_mass_from_length_theropoda(16)
 
 #2b
-get_mass_from_length <- function(a, b, length) {
-  mass <- a * length ^ b
-  return(mass)
+get_mass_from_length <- function(a, b, length) { # name fn and assign input
+  mass <- a * length ^ b                         # script for what fn will perform
+  return(mass)                                   # assign return object
 }
 get_mass_from_length(214.44, 1.46, 26)
 ```
@@ -148,7 +148,8 @@ c.  The function in (b) assumes that the weight is provided in grams. Use the fu
 
 ```{r}
 #3a
-convert_pounds_to_grams <- function(pounds, numdigits = 1) {
+convert_pounds_to_grams <- function(pounds,
+                                    numdigits = 1) { 
   grams <- 453.6 * pounds
   rounded <- round(grams, digits = numdigits)
   return(rounded)
