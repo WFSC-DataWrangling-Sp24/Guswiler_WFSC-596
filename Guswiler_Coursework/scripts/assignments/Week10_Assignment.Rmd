@@ -149,7 +149,7 @@ c.  The function in (b) assumes that the weight is provided in grams. Use the fu
 ```{r}
 #3a
 convert_pounds_to_grams <- function(pounds,
-                                    numdigits = 1) { 
+                                    numdigits = 1) { # default to 1 dec. place
   grams <- 453.6 * pounds
   rounded <- round(grams, digits = numdigits)
   return(rounded)
@@ -184,16 +184,17 @@ a.  Use this function to estimate the mass of a *Sauropoda* (`a = 214.44`, `b = 
 b.  Use this function to estimate the mass of a dinosaur from an unknown taxonomic group that is 16m long. Only pass the function `length`, not `a` and `b`, so that the default values are used.
 
 ```{r}
-get_mass_from_length <- function(a = 39.9, b = 2.6, length) {
+get_mass_from_length <- function(length,
+                                 a = 39.9, b = 2.6) { # default values for objects
   mass <- a * length ^ b
   return(mass)
 }
 
 #4a
-get_mass_from_length(214.44, 1.46, 22)
+get_mass_from_length(22, 214.44, 1.46)
 
 #4b
-get_mass_from_length(length = 16)
+get_mass_from_length(16)
 ```
 
 ### 5. Combining Functions (20 points)
@@ -250,13 +251,13 @@ count_data
 
 #6b
 make_scatter <- function(df, col_area, col_count, color_by) {
-  ggplot(df, aes({{col_area}}, {{col_count}})) + 
-    geom_point(size = 3, aes(color = {{color_by}})) +
-    labs(x = "Area (ha)", y = "Number of Individuals")
+  ggplot(df, aes({{col_area}}, {{col_count}})) +       # plotted data and mapping
+    geom_point(size = 3, aes(color = {{color_by}})) +  # plot type and color
+    labs(x = "Area (ha)", y = "Number of Individuals") # axes labels
 }
 make_scatter(count_data, area, count, state)
 
-ggsave("../../outputs/Assignment10_6b_plot.png")
+ggsave("../../outputs/Assignment10_6b_plot.png") # save most recent plot as .png
 
 #6c
 make_scatter(count_data, area, count, site)
