@@ -1,6 +1,7 @@
 ---
 title: 'Week 3: Data Tables'
-author: "Olivia Guswiler"
+author: "Ellen Bledsoe"
+annotations: "Olivia Guswiler"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
