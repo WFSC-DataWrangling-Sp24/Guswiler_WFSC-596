@@ -1,6 +1,6 @@
 ---
 title: 'Assignment 11: Conditionals'
-author: "Ellen Bledsoe"
+author: "Olivia Guswiler"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
@@ -64,14 +64,45 @@ g.  `w` is greater than `x`, or `y` is greater than `z`
 h.  `x` times `w` is between 13.2 and 13.5
 i.  Each mass in `masses` is between 30 and 50.
 
+```{r}
+#1a
+w > 10
+
+#1b
+"green" %in% colors
+
+#1c
+x > y
+
+#1d
+masses > 40
+
+#1e
+dna1 == dna2
+
+#1f
+dna1 != dna2
+
+#1g
+w > x | y > z
+
+#1h
+(x * w) %in% 13.2:13.5
+
+#1i
+masses %in% 30:50
+```
+
 ### 2. If Statements (20 points)
 
 a.  Complete the following `if` statement so that if `age_class` is equal to "sapling" it sets `y <- 10`.
 
 ```{r}
+#2a
 age_class = "sapling"
-if (){
-  
+
+if (age_class == "sapling"){
+  y <- 10
 }
 y
 ```
@@ -79,9 +110,13 @@ y
 b.  Complete the following `if` statement so that if `age_class` is equal to "sapling" it sets `y <- 10` and if `age_class` is equal to "seedling" it sets `y <- 5`.
 
 ```{r}
+#2b
 age_class = "seedling"
-if (){
-  
+
+if (age_class == "sapling"){
+  y <- 10
+} else if (age_class == "seedling") {
+  y <- 5
 }
 y
 ```
@@ -89,14 +124,40 @@ y
 c.  Complete the following `if` statement so that if `age_class` is equal to "sapling" it sets `y <- 10` and if `age_class` is equal to "seedling" it sets `y <- 5` and if `age_class` is something else then it sets the value of `y <- 0`.
 
 ```{r}
+#2c
 age_class = "adult"
-if (){
-  
+
+if (age_class == "sapling"){
+  y <- 10
+} else if (age_class == "seedling") {
+  y <- 5
+} else {
+  y <- 0
 }
 y
 ```
 
 d.  Convert your conditional statement from (c) into a function that takes `age_class` as an argument and returns `y`. Call this function 5 times, once with each of the following values for `age_class`: "sapling", "seedling", "adult", "mature", "established".
+
+```{r}
+#2d
+return_y <- function (age_class) {
+  if (age_class == "sapling") {
+    y <- 10
+  } else if (age_class == "seedling") {
+    y <- 5
+  } else {
+    y <- 0
+  }
+  return(y)
+}
+
+return_y("sapling")
+return_y("seedling")
+return_y("adult")
+return_y("mature")
+return_y("established")
+```
 
 ### 3. If Statements in Functions (20 points)
 
