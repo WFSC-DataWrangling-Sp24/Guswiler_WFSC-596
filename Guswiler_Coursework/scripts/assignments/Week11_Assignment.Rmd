@@ -99,10 +99,10 @@ a.  Complete the following `if` statement so that if `age_class` is equal to "sa
 
 ```{r}
 #2a
-age_class = "sapling"
+age_class <- "sapling"
 
-if (age_class == "sapling"){
-  y <- 10
+if (age_class == "sapling"){ # set condition
+  y <- 10                    # if TRUE, do this
 }
 y
 ```
@@ -111,12 +111,12 @@ b.  Complete the following `if` statement so that if `age_class` is equal to "sa
 
 ```{r}
 #2b
-age_class = "seedling"
+age_class <- "seedling"
 
-if (age_class == "sapling"){
-  y <- 10
-} else if (age_class == "seedling") {
-  y <- 5
+if (age_class == "sapling"){          # set 1st condition
+  y <- 10                             # if TRUE, do this
+} else if (age_class == "seedling") { # set 2nd condition
+  y <- 5                              # if cond. 1 FALSE & cond. 2 TRUE, do this  
 }
 y
 ```
@@ -127,12 +127,12 @@ c.  Complete the following `if` statement so that if `age_class` is equal to "sa
 #2c
 age_class = "adult"
 
-if (age_class == "sapling"){
-  y <- 10
-} else if (age_class == "seedling") {
-  y <- 5
-} else {
-  y <- 0
+if (age_class == "sapling"){          # set 1st condition
+  y <- 10                             # if cond. 1 TRUE, do this
+} else if (age_class == "seedling") { # set 2nd condition
+  y <- 5                              # if cond. 1 FALSE & cond. 2 TRUE, do this
+} else {                              
+  y <- 0                              # if cond. 1 & 2 FALSE, do this
 }
 y
 ```
@@ -141,7 +141,7 @@ d.  Convert your conditional statement from (c) into a function that takes `age_
 
 ```{r}
 #2d
-return_y <- function (age_class) {
+return_y <- function (age_class) {  # name fn & assign input
   if (age_class == "sapling") {
     y <- 10
   } else if (age_class == "seedling") {
@@ -149,7 +149,7 @@ return_y <- function (age_class) {
   } else {
     y <- 0
   }
-  return(y)
+  return(y)                         # assign return object
 }
 
 return_y("sapling")
@@ -166,6 +166,43 @@ b.  Call the function from (a) with `30` as the input.
 c.  Write a function called `prediction` that takes a single argument `x`. If `x` is both greater than 0 and less than 15 then return `y = 6 + 0.8 * x`. If `x` is both greater than 15 and less than 30 then return `y = 5 + 0.75 * x`. In all other cases return `y = NA`. Call the function with `5` as the input.
 d.  Call the function from (c) with `26` as the input.
 e.  Call the function from (c) with `-2` as the input.
+
+```{r}
+#3a
+double_if_small <- function(number){
+  if (number < 26) {
+    x <- number * 2
+  } else if (number >= 26) {
+    x <- number
+  }
+  return(x)
+}
+
+double_if_small(10)
+
+#3b
+double_if_small(30)
+
+#3c
+prediction <- function(x){
+  if (x %in% 1:14) {
+    y <- 6 + 0.8 * x
+  } else if (x %in% 16:29) {
+    y <- 5 + 0.75 * x
+  } else {
+    y <- NA
+  }
+  return(y)
+}
+
+prediction(5)
+
+#3d
+prediction(26)
+
+#3e
+prediction(-2)
+```
 
 ### 4. Size Estimates by Name (20 points)
 
@@ -186,6 +223,28 @@ Create a new function `get_mass_from_length_by_name()` that takes two arguments,
 If the name is not any of these values the function should return `NA`.
 
 Run the function for: a. A *Stegosauria* that is 10 meters long. b. A *Theropoda* that is 8 meters long. c. A *Sauropoda* that is 12 meters long. d. A *Ankylosauria* that is 13 meters long.
+
+```{r}
+#4
+get_mass_from_length_by_name <- function(dino, length){ 
+  dino <- tolower(dino)              # make dino input case insensitive to allow 
+  if (dino == "stegosauria") {       #  for variability in input
+    mass <- 10.95 * length ^ 2.64    
+  } else if (dino == "theropoda") {  
+    mass <- 0.73 * length ^ 3.63     
+  } else if (dino == "sauropoda") {  
+    mass <- 214.44 * length ^ 1.46   
+  } else {                          # if all cond. FALSE, set mass = `NA`
+    mass <- NA
+  }
+  return(mass)
+}
+
+get_mass_from_length_by_name("Stegosauria", 10)
+get_mass_from_length_by_name("Theropoda", 8)
+get_mass_from_length_by_name("sauropoda", 12)
+get_mass_from_length_by_name("ankylosauria", 13)
+```
 
 ### 5. Using `dplyr` Choice Functions (20 points)
 
@@ -208,3 +267,43 @@ d.  Take a look at the `pie_crab` dataset from the `lterdatasampler` package by 
 e.  Now use the `case_when` function inside a `mutate` function to create a new column called `size_category3` in the `pie_crab` dataframe that meets the same conditions as (b) and (c).
 
     I've placed my new column next to the size column for the sake of the answer key; you don't need to do this.
+
+```{r}
+library(tidyverse)                     # load packages and 
+# install.packages("lterdatasampler")  #  install if needed
+library(lterdatasampler)
+
+crab_size <- 17
+
+#5a
+if_else(crab_size >= 20, "large", "small") # if crab_size >= 20, size cat. =
+                                           #  "large"; if < 20, "small"
+
+#5b
+if_else(crab_size >= 20, "large",                      # if crab_size >= 20, size 
+        if_else(crab_size >= 10, "medium",             #  cat. = "large"; if 19:10,
+                if_else(crab_size < 10, "small", NA))) #  "medium"; if <10, "small"
+
+#5c
+case_when(crab_size >= 20 ~ "large",   # if crab size >= 20, size cat. = "large";
+          crab_size >= 10 ~ "medium",  #  if crab size 19:10, size cat. = "medium";
+          crab_size < 10 ~ "small")    #  if crab size < 10, size cat. = "small"
+
+#5d
+head(pie_crab)
+
+pie_crab <- pie_crab %>% 
+  mutate(.before = "air_temp",  # add new col. here
+         size_category =
+           if_else(size >= 20, "large", "small"))
+pie_crab
+
+#5e
+pie_crab <- pie_crab %>% 
+  mutate(.before = "air_temp",
+         size_category3 =
+           case_when(size >= 20 ~ "large",
+                     size >= 10 ~ "medium",
+                     size < 10 ~ "small"))
+pie_crab
+```
