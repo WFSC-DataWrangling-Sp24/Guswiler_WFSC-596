@@ -1,0 +1,47 @@
+---
+title: "Guswiler_Final"
+author: "Olivia Guswiler"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Install/load packages
+
+Install and load necessary packages.
+
+```{r}
+# Install required packages if you do not already have them
+# install.packages("tidyverse")
+# install.packages("ctmm")
+
+library(tidyverse)
+library(ctmm)
+```
+
+## Bring in cleaned data for referencing
+
+Data from Ecological impact of inside/outside house cats around a suburban nature preserve ([Kays and DeWan, 2020](https://www.doi.org/10.5441/001/1.s6t84pb5)). 12 cats were tracked from May to August 1991 in Albany, NY.
+
+Process of cleaned data is in scripts/final_project.Rmd
+
+```{r}
+cats_clean <- read_csv("../data_clean/NY_cats.csv")
+```
+
+## ctmm
+
+```{r}
+# 
+telemetry <- as.telemetry('../../Guswiler_FinalProject/data_clean/NY_cats.csv')
+
+plot(telemetry, main = "12 Domestic Cats, Albany NY")
+
+COL <- color(telemetry,by='individual')
+
+
+plot(telemetry, col=COL, main = "12 Domestic Cats, Albany NY")
+```
