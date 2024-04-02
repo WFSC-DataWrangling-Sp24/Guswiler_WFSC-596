@@ -138,6 +138,11 @@ cats_clean
 write_csv(cats_clean, "../../Guswiler_FinalProject/data_clean/NY_cats.csv")
 ```
 
+```{r echo=FALSE, include=FALSE}
+# Pulling clean data to avoid running previous script, remove this later
+cats_clean <- read_csv("../data_clean/NY_cats.csv")
+```
+
 ## Looking at the Data
 
 Remove feral?
@@ -155,4 +160,17 @@ cats_clean %>%
   distinct(`animal-reproductive-condition`, `animal-sex`, `animal-id`) %>% 
   count(`animal-reproductive-condition`, `animal-sex`)
 # 3 fertile, 9 fixed
+```
+
+## ctmm
+
+```{r}
+telemetry <- as.telemetry('../../Guswiler_FinalProject/data_clean/NY_cats.csv')
+
+plot(telemetry, main = "12 Domestic Cats, Albany NY")
+
+COL <- color(telemetry,by='individual')
+
+
+plot(telemetry, col=COL, main = "12 Domestic Cats, Albany NY")
 ```
