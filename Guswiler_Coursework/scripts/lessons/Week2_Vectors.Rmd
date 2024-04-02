@@ -1,6 +1,7 @@
 ---
 title: 'Week 2: Vectors: Notes'
-author: "Olivia Guswiler"
+author: "Ellen Bledsoe"
+annotations: "Olivia Guswiler"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
