@@ -1,0 +1,272 @@
+---
+title: 'Week 11: Making Choices'
+author: "Ellen Bledsoe"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Making Choices
+
+## Conditionals
+
+When we want to make choices in R, we are most often using some type of conditional statement.
+
+We talked about conditional statements early in the class when we talked about conditional sub-setting, and we've continued to use them frequently throughout the course in our `filter` functions!
+
+Here are some examples below.
+
+```{r eval=FALSE}
+
+```
+
+When we run these lines of code, these statements produce an output that is a generate a `"logical"` data type.
+
+-   `TRUE` if the condition is satisfied
+-   `FALSE` if the condition is not satisfied
+
+As a reminder, these are not the same as strings "TRUE" and "FALSE." These are a special type of value called "boolean."
+
+In some ways, they are similar to `NA` values. True `NA` values do not go in quotation marks because they are a special data type; the same is true for `TRUE` (or `T`) and `FALSE` (`F`).
+
+### Conditional Operators
+
+As we've seen in previous classes, conditional statements can be created with a number of different operators.
+
+We have the "traditional" operators:
+
+-   `==` for equals
+-   `!=` for not equals
+-   `<` and `>` for less than or greater than
+-   `<=`, `>=` for less than or equal to or greater than or equal to
+
+For example:
+
+```{r}
+
+```
+
+There are other operators that we have not yet used, such as `%in%`. This is a very handy little operator!
+
+It checks to see if a value is present in a vector of possible values.
+
+```{r}
+
+```
+
+There are also a number of functions that return these boolean data types.
+
+For example, the `is.na()` function returns `TRUE` or `FALSE` depending on whether a value is null or not.
+
+```{r}
+
+```
+
+### Reversing Conditions
+
+When we want the opposite of a certain condition, we can use the `!` operator to negate the condition.
+
+In doing so, it reverses the boolean values that are returned (`TRUE` becomes `FALSE` and `FALSE` becomes `TRUE`).
+
+```{r}
+
+```
+
+> Work on Question 1: Choice Operators
+
+## `if` statements
+
+Conditional statements generate logical values. One type of statement that we can write that uses conditional statements are `if` statements. We can use these to control the flow of our program.
+
+```{r}
+# if (conditional statement is TRUE) {
+#   do something
+# }
+```
+
+For example:
+
+```{r}
+
+```
+
+What happens when the conditional statement in `FALSE`?
+
+```{r}
+
+```
+
+As a reminder, this `if` statement is *not* a function, so everything that happens in the `if` statement influences the global environment.
+
+Let's look at another example, this time with some character values.
+
+Perhaps different vegetation types require different biomass calculations.
+
+```{r}
+
+```
+
+> Work on Question 2a
+
+## `if`-`else` statements
+
+Often, we want to chose one of several options rather than just one.
+
+To do this, we can add more conditions and associated actions with `else if`
+
+Let's take a look at an example.
+
+```{r}
+
+```
+
+The code above checks the first condition. If `TRUE`, it will run that condition's code and skips the rest. If `FALSE`, it will check the next one and keep going until it runs out of conditions to check.
+
+We can also specify what should happen none of the conditions are `TRUE` using `else` on its own.
+
+```{r}
+
+```
+
+> Work on Question 2b-2c
+
+## Conditionals Inside Functions
+
+So far, we've used a conditional to estimate biomass for different types of vegetation.
+
+This seems like code we would want to reuse, so it would be a good idea to create a function to do this.
+
+We can place our entire `if`-`else` statement inside a function, making sure that the function takes all required variables as arguments.
+
+```{r}
+
+```
+
+Now, we can run this function with different vegetation types and get different estimates for mass.
+
+```{r}
+
+```
+
+> Work on Question 2d.
+
+## Multiples
+
+Let's compare multiple `if` statements to `if`-`else if` statements.
+
+Multiple `if` statements are going to check each conditional separately. The code will execute for all conditions which are true.
+
+```{r}
+
+```
+
+On the other hand, an `else if` statement is going to check each condition sequentially. It will only execute code for the first condition which is `TRUE`.
+
+```{r}
+
+```
+
+### Nested Conditionals
+
+Sometimes decisions are complicated and need more than one series of conditional statements.
+
+For example, we might have different equations for some vegetation types based on the age of the plant.
+
+In order to do this, we can "nest" conditionals inside of one another.
+
+```{r}
+
+```
+
+This function First checks if the vegetation type is "shrub".
+
+If it is, it then checks to see if it is \< 5 years old. If so, it will do the specified calculation. If not, it move on to the next calculation.
+
+> Spend some time working through Questions 3 and 4.
+
+## Making Choices in the `tidyverse`
+
+All of the statements we have been working with have been outside of the `tidyverse`.
+
+The `tidyverse` (`dplyr` in particular) has functions that we can use to accomplish the same tasks.
+
+```{r}
+
+```
+
+When the choice is binary (choose one of two outcomes), we can use the `if_else` function.
+
+The arguments for an `if_else` function are:
+
+-   the conditional statement
+-   the outcome if the statement is `TRUE`
+-   the outcome if the statement is `FALSE`
+
+```{r}
+
+```
+
+We can also nest the `if_else` functions.
+
+```{r}
+
+```
+
+When we have situations where we would need to nest `if_else` statements, these nested statements can get pretty hard to interpret.
+
+In order to avoid these nested `if_else` statements, we can use the `case_when` function.
+
+The `case_when` function uses the `~` to set expressions.
+
+```{r}
+
+```
+
+In a circumstance where you want something similar to the `else` statement (meaning, if none of these conditions are met, do something else), we have to do something rather unique in the `case_when` function.
+
+Essentially, we have to force a `TRUE` outcome, which we do by literally using `TRUE` as the final option.
+
+```{r}
+
+```
+
+### Using `if_else` and `case_when` with `mutate`
+
+One of the nicest aspects of the `if_else` and `case_when` functions is that we can use them within mutate functions to make new columns (or edit existing columns) in our dataframes.
+
+Let's look at an example using a dataframe from a package called `lterdatasampler`. This package has a number of cleaned datasets from Long Term Ecological Research (LTER) sites around the US.
+
+```{r}
+
+```
+
+We are going to use the `and_vertebrates` dataset, which contains data about trout and salamanders from Andrews Forest LTER.
+
+```{r}
+
+```
+
+The `section` column denotes whether the data were collected in clear cut forest ("CC") or old growth forest ("OG").
+
+Let's make a new column in the data frame that has "Clear Cut" when the value is "CC", "Old Growth" when the value is "OG", and `NA` if there is something else.
+
+```{r}
+
+```
+
+## Why `if`-`else if`?
+
+If `dplyr` has such nice functions for making choices, why did I teach you about the seemingly more complicated `if`-`else if` structures?
+
+There are a few reasons.
+
+1)  In setting up `if_else` or `case_when` functions, it is helpful to know what is happening in the background.
+
+2)  When you see other people's code, you are very likely to come across the `if`-`else if` structure, and you should know what it means and how to use it.
+
+3)  Finally, while `if_else` and `case_when` are really handy for somewhat straight-forward decisions, sometimes you need to perform a lot of tasks if a condition is true or false. It is much easier to add in multiple tasks to do in the `if`-`else if` structure than in the `tidyverse` structure.
+
+> Work on Question 5 and finish the Assignment.
