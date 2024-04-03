@@ -32,7 +32,6 @@ Now, let's load the `tidyverse` package this time and see what happens.
 
 ```{r}
 library(tidyverse)
-library(here)
 ```
 
 This message is telling us that we have now loaded the following packages into our workspace: `dplyr`, `forcats`, `ggplot2`, `lubridate`, `purrr`, `readr`, `stringr`, `tibble`, and `tidyr`. By the end of the course, we will have used functions from \~6 of these packages.
@@ -61,10 +60,8 @@ There are 3 different treatments:
 First, let's download the data from the UHURU into Posit Cloud.
 
 ```{r}
-download.file("https://ndownloader.figshare.com/files/5629542",
-              here("data_raw/ACACIA_DREPANOLOBIUM_SURVEY.txt"))
-download.file("https://ndownloader.figshare.com/files/5629536",
-              here("data_raw/TREE.txt"))
+# download.file("https://ndownloader.figshare.com/files/5629542", "../../data_raw/ACACIA_DREPANOLOBIUM_SURVEY.txt")
+# download.file("https://ndownloader.figshare.com/files/5629536", "../../data_raw/TREE.txt")
 ```
 
 So far we've been working with datasets that are separated by commas, saved as .csv files. This dataset, however, is a bit different.
@@ -74,7 +71,7 @@ When we open this data, we can see that the data are separated by tabs. We can a
 In order to read this data into our working environment, we will use another function from the `readr` package: `read_tsv()` ("read tab-separated values").
 
 ```{r}
-acacia <- read_tsv(here("data_raw/ACACIA_DREPANOLOBIUM_SURVEY.txt"))
+acacia <- read_tsv("../../data_raw/ACACIA_DREPANOLOBIUM_SURVEY.txt")
 ```
 
 When we take a look at the data, we can also see that it includes information on whether or not the plant is dead in the `HEIGHT` column.
@@ -93,7 +90,7 @@ The argument is passed as a vector in order to allow multiple different values t
 
 ```{r}
 # na = c("dead", "") <- specifies what should be read in as NAs. As it's written, this will read in blanks and "dead" as NA.
-acacia <- read_tsv(here("data_raw/ACACIA_DREPANOLOBIUM_SURVEY.txt"), na = c("dead", ""))
+acacia <- read_tsv("../../data_raw/ACACIA_DREPANOLOBIUM_SURVEY.txt"), na = c("dead", "")
 ```
 
 Looking at the data frame, we can see that it includes information on:
@@ -457,19 +454,19 @@ By default, `ggsave()` will save the most recent plot you've made.
 
 ```{r}
 # need to include filetype in filename!
-ggsave(filename = here("outputs/acacia_circ_v_height.png"))
+ggsave(filename = "../../outputs/acacia_circ_v_height.png")
 ```
 
 The type of the file is determined by the file extension. You can use `.jpg`, `.png`, `.pdf`, etc.
 
 ```{r}
-ggsave(here("outputs/acacia_circ_v_height.pdf"))
+ggsave("../../outputs/acacia_circ_v_height.pdf")
 ```
 
 There are many optional arguments that you can include, such as height and width.
 
 ```{r}
-ggsave(here("outputs/acacia_circ_v_height.png"),
+ggsave("../../outputs/acacia_circ_v_height.png",
        height = 5, width = 7)
 ```
 
@@ -480,7 +477,7 @@ scatterplot <- ggplot(acacia, aes(CIRC, HEIGHT)) +
   geom_point()
 
 
-ggsave(here("outputs/acacia_circ_v_height_scatter.png"),
+ggsave("../../outputs/acacia_circ_v_height_scatter.png",
        scatterplot,
        height = 5, width = 5)
 ```

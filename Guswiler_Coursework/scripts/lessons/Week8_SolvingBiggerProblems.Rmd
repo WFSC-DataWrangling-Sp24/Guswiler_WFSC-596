@@ -32,17 +32,17 @@ Let's read in the `tidyverse` and download our datasets to get started.
 ```{r}
 # packages
 library(tidyverse)
-library(here)
+
 
 # data
 download.file("https://ndownloader.figshare.com/files/2292172",
-  here("data_raw/surveys.csv"))
+              "../../data_raw/surveys.csv")
 download.file("https://ndownloader.figshare.com/files/3299474",
-  here("data_raw/plots.csv"))
+              "../../data_raw/plots.csv")
 download.file("https://ndownloader.figshare.com/files/3299483",
-  here("data_raw/species.csv"))
+              "../../data_raw/species.csv")
 download.file("https://datacarpentry.org/semester-biology/data/mammal-size-data-clean.tsv",
-  here("data_raw/mammal-size-data-clean.txt"))
+              "../../data_raw/mammal-size-data-clean.txt")
 ```
 
 ## Problem Decomposition steps
@@ -97,8 +97,8 @@ a time
 # group data by species
 # summary data of hindfoot length
 
-surveys <- read_csv(here("data_raw/surveys.csv"))
-species <- read_csv(here("data_raw/species.csv"))
+surveys <- read_csv("../../data_raw/surveys.csv")
+species <- read_csv("../../data_raw/species.csv")
 
 avg_rodent_hf_cm <- surveys %>% 
   inner_join(species, join_by(species_id)) %>%   # join surveys with species
@@ -154,8 +154,8 @@ strategies above.
 Code chunk to debug: leave as is for reference.
 
 ```{r eval=FALSE}
-surveys <- read_csv(here('data_raw/surveys.csv'))
-species <- read_csv(here('data_raw/species.csv'))
+surveys <- read_csv('../../data_raw/surveys.csv')
+species <- read_csv('../../data_raw/species.csv')
 
 do_counts_by_year <- survey %>% 
   filter(species = "DO") %>% 

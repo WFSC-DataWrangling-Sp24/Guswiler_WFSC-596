@@ -30,10 +30,10 @@ We'll start by loading the species table into R if it isn't there already.
 ```{r}
 library(dplyr)
 library(readr)
-library(here)
-surveys <- read_csv(here("data_raw/surveys.csv"))
-species <- read_csv(here("data_raw/species.csv"))
-plots <- read_csv(here("data_raw/plots.csv"))
+
+surveys <- read_csv("../../data_raw/surveys.csv")
+species <- read_csv("../../data_raw/species.csv")
+plots <- read_csv("../../data_raw/plots.csv")
 ```
 
 ### Square Brackets

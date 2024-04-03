@@ -12,10 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Making Untidy Data Tidy
 
-```{r}
-library(here)
-```
-
 This week's lessons are about how to take untidy data tidy.
 
 First, let's remind ourselves what out "tidy" data means.
