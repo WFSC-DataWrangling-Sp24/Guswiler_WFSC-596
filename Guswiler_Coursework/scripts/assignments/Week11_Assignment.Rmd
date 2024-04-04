@@ -281,8 +281,7 @@ if_else(crab_size >= 20, "large", "small") # if crab_size >= 20, size cat. =
 
 #5b
 if_else(crab_size >= 20, "large",                      # if crab_size >= 20, size 
-        if_else(crab_size >= 10, "medium",             #  cat. = "large"; if 19:10,
-                if_else(crab_size < 10, "small", NA))) #  "medium"; if <10, "small"
+        if_else(crab_size >= 10, "medium", "small"))   #  "medium"; if <10, "small"
 
 #5c
 case_when(crab_size >= 20 ~ "large",   # if crab size >= 20, size cat. = "large";
