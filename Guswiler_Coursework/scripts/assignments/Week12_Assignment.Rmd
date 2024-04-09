@@ -41,6 +41,10 @@ April 15 at midnight MST
 
 Be sure to load the `tidyverse` to use later in the assignment.
 
+```{r}
+library(tidyverse)
+```
+
 ### 1. For Loop Basics (30 pts)
 
 Complete the following tasks.
@@ -129,6 +133,44 @@ a.  Use this function and a for loop to calculate the estimated mass for each di
 b.  Add the results in the vector back to the original data frame. Show the first few rows of the data frame using `head()`.
 c.  Calculate the mean mass for each `species` using `dplyr` (no `for` loops).
 
+```{r}
+dinosaur_lengths <- read_csv("../../data_raw/dinosaur_lengths.csv") # read in the file
+
+mass_from_length <- function(length, species) {
+  species <- tolower(species)
+  mass <- case_when(species == "stegosauria" 
+                    ~ 10.95 * length ^ 2.64,
+                    species == "theropoda" 
+                    ~ 0.73 * length ^ 3.63,
+                    species == "sauropoda"
+                    ~ 214.44 * length ^ 1.46,
+                    .default = 25.37 * length ^ 2.49)
+  return(mass)
+}
+
+#1a
+dinosaur_masses <- vector("numeric",   # create a new vector to hold numeric output
+                        length(dinosaur_lengths$lengths)) # same L as dino_lengths
+
+for (i in 1:length(dinosaur_lengths$lengths)) {
+  mass <- mass_from_length(dinosaur_lengths$lengths[i],
+                           dinosaur_lengths$species[i])
+  dinosaur_masses[i] <- mass
+}
+head(dinosaur_masses)
+
+#1b
+dinosaur_lengths <- dinosaur_lengths %>% 
+  mutate(masses = dinosaur_masses)
+
+head(dinosaur_lengths)
+
+#1c
+dinosaur_lengths %>% 
+  group_by(species) %>% 
+  summarise(mean(masses))
+```
+
 ### 3. Multi-file Analysis (40 pts)
 
 You have satellite collars on a number of different individuals and want to be able to quickly look at all of their recent movements at once. The data is posted daily to a URL that contains one csv file for each individual: [zip file](http://www.datacarpentry.org/semester-biology/data/individual_collar_data.zip)
@@ -148,6 +190,11 @@ Include the name of the file in the graph as the graph title using the `ggtitle(
 b.  Add code to the loop to calculate the minimum and maximum latitude in the file, and store these values, along with the name of the file, in a data frame.
 
 Show the data frame as output.
+
+```{r}
+download.file("http://www.datacarpentry.org/semester-biology/data/individual_collar_data.zip", destfile = "../../data_raw/individual_collar_data.zip")
+unzip("../../data_raw/individual_collar_data.zip")
+```
 
 # Reflection
 
