@@ -1,0 +1,311 @@
+---
+title: 'Week 12: Iteration'
+author: "Ellen Bledsoe"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Iteration
+
+In this week's lesson, we will be talking about how to do repetitive tasks.
+
+As it turns out, computers are really good at repeating tasks. We call this repetition of the same task "iteration."
+
+### Overview of Iteration in R
+
+While our lesson today will focus mainly on one way to iterate in R, there are actually many ways to do so:
+
+1.  **vectorize**
+
+-   We can write functions that take either a single value or a vector of values, do element-wise calculations, and return a vector of results
+-   This isn't as tricky as it might sound. Many functions automatically work with either a single value or a vector of values
+-   Each function we wrote in our functions lesson in Week 10 can work with vectors
+-   An important exception it when we use `if`-`else` statements inside our functions; these do not work with vectors
+
+2.  **`apply` or `map`**
+
+-   Both of these family of functions take a function and apply that function to each item in a list of items
+-   The `apply` functions (e.g., `apply`, `lapply`, `sapply`) are base R
+-   The `map` functions come from the `purrr` package, part of the `tidyverse`
+
+3.  **using `dplyr`**
+
+-   We've actually already been iterating quite a bit--specifically in data frames--by using function from `dplyr`; we can also combine our own functions with `dplyr`
+-   For example, when we use a `filter` function, we are asking R to check the value in a column in the first row, then determine whether that condition is met (and, therefore, whether to retain the row), then to do the same thing for the next row and the next...
+
+4.  **loops**
+
+-   Loops provide us with complete control to perform of any kind of repetition we want (rather than just one function at a time, for example)
+
+This week's lesson is going to focus primarily on using loops, specifically `for` loops.
+
+## The `for` Loop
+
+Loops are the fundamental structure for repetition in programming.
+
+In particular, `for` loops perform the same action for each item in a list of things.
+
+The general structure of a `for` loop is below:
+
+```{r}
+# for (item in list_of_items) {
+#   do_something(item)
+# }
+```
+
+To see an example of this, let's calculate masses from volumes using a loop. If we want to see the results of the loop, we need to print them out. In this loop, we are going to use a `print()` function to display our results for each mass.
+
+```{r}
+
+```
+
+The code that is inside of the curly brackets will run once for each value in `volumes`.
+
+Everything between the curly brackets is executed each time through the loop.
+
+The loop takes the first value from `volumes` and assigns it to the object `volume`. It performs the code inside the curly brackets, calculating the mass and then printing the resulting mass.
+
+Once the code hits the end of of what is enclosed inside the curly brackets, it starts the code all over again from the beginning using the next item in the list (or the `volumes` vector, in this case). The code takes the second value from `volumes` and assigns it to `volume` and does the calculation and prints it.
+
+It continues to repeat this process--running the code with one value, then starting the whole process over again with the next value--until it has run through every element in the list.
+
+Ultimately, the loop above is doing the exact same thing as the code below, but in a more condensed and more flexible way.
+
+```{r}
+volume <- volumes[1]
+mass <- 2.65 * volume ^ 0.9
+print(mass)
+
+volume <- volumes[2]
+mass <- 2.65 * volume ^ 0.9
+print(mass)
+
+volume <- volumes[3]
+mass <- 2.65 * volume ^ 0.9
+print(mass)
+```
+
+> Work on Questions 1a and 1b in the Assignment.
+
+## Looping with an Index
+
+Loops are iterating over a series of elements in a vector or other list-like object. When we use that value directly, this is called looping by value.
+
+There is another way to loop: *looping by index*.
+
+You might remember way back at the beginning of the course that we talked about two different ways to subset data: by index or by condition. Sub-setting based on index meant sub-setting *based on the position* of the item(s) we are interested in.
+
+Looping by index does something similar. It loops through a list of integer index values, typically starting at 1. These integers are then used to access values in one or more vectors *based on the position* indicated by the index.
+
+Let's take our previous loop and modify it to use an index.
+
+1.  We often use `i` to stand for "index" as the variable we update with each step through the loop.
+
+```{r eval = FALSE}
+
+```
+
+2.  We then create a vector of position values starting at 1 (for the first value) and ending with the length of the object we are looping over.
+
+```{r eval = FALSE}
+
+```
+
+3.  What if the length of the object we are looping over is variable or might change in the future? We don't want to be stuck with a certain length.
+
+Fortunately, we don't have to know the length of the vector. We can add flexibility by using a function to count the number of elements that we will want to loop over.
+
+-   For a vector, the `length()` function is useful for this.
+-   For a data frame, the `nrow()` function is often used.
+
+Because we are currently working with a vector, let's use the `length()` function.
+
+```{r}
+v
+```
+
+4.  Then, inside the loop, instead of doing the calculation on the index value (which a number between 1 and 3 in our case), we use square brackets and the index as a placeholder. Now, the loop will run through the code, replacing the `i` placeholder with the appropriate value from our vector.
+
+```{r}
+
+```
+
+This new version of the loop gives us the same result as our original loop, but it's more complicated to understand. So why would we want to loop by index?
+
+The advantage to looping by index is that it lets us do more complicated things, as we will see below.
+
+### Storing Results
+
+One of the most common things we use for loops with indices for is storing the results we calculated in the loop. We typically want the results to be in the same order (position) as what we used to calculate them.
+
+To store results, we start by creating an empty object (vector, column, data frame, etc.) before the loop starts. This object should be the same length as the results will be, which is typically the same as the object we are looping over.
+
+To store results in a vector, we can use the function `vector` to create an empty vector of the correct length. For the `vector` function:
+
+-   `mode` is the type of data we are going to store
+-   `length` is the length of the vector
+
+```{r}
+
+```
+
+Now that we have a place to store the results, we need to tell the loop to place the results in the correct position in the empty vector. We can use the index to do this.
+
+For each trip through the loop, we want to put the output into the empty vector at the `i`th position.
+
+```{r}
+
+```
+
+> Work on Questions 1c and 1d in the Assignment.
+
+## Looping over Multiple Values
+
+So far, we've talked about looping through one group of values (in a vector). Looping with an index also allows us to access values from multiple vectors.
+
+```{r}
+
+```
+
+> Work on Question 1e in the Assignment.
+
+## Looping with Functions
+
+Another common thing to do is combine loops with functions by calling one or more functions as a step in our loop.
+
+For example, let's take the non-vectorized version of our `est_mass` function that returns an estimated mass if the `volume > 5` and `NA` if it's not.
+
+```{r}
+
+```
+
+We can't pass the vector to the function and get back a vector of results because of the `if` statements because `if` statements are not vectorized.
+
+Instead, we can loop over the values.
+
+First, we'll create an empty vector to store the results. Then we will loop by index, calling the function for each value of `volumes`.
+
+```{r}
+
+```
+
+If we hadn't written the `if`-`else` statement as a function (`est_mass_max`), we could still include it! It would look like this:
+
+```{r}
+
+```
+
+Realistically, I find myself putting `if`-`else` statements inside `for` loops, like the structure above, rather frequently.
+
+## Looping over Data Frames
+
+By default, when R loops over a data frame, it loops over the columns. Remember, R is oriented to work in vectors, and data frames are organized by converting multiple vectors into the columns.
+
+```{r}
+
+```
+
+To loop over rows, we need to do some extra work. We can loop by index and subset each row.
+
+```{r}
+
+```
+
+If we want to use a specific column, we need to specify the column via sub-setting, as well. We can do that 2 different ways.
+
+```{r}
+
+```
+
+An alternative structure (without the created function) might look like this.
+
+We can create a new, empty column in the data frame. We can also place the `if`-`else` statement directly into the for loop and reference specific columns with `$` operator and subset by index, as we did above.
+
+```{r}
+
+```
+
+> Work on Question 2 in the Assignment.
+
+### Looping over Files
+
+While we often want to repeat things within our data, either in vectors or data frames, there are other instances when we might want to repeat the same task.
+
+For example, if we have many similar files, we might want to repeat the same tasks for all of those files.
+
+To demonstrate, let's download some simulated satellite collar data. Make sure you change the file paths accordingly to match the sub-directories in your RStudio Project, as needed.
+
+```{r}
+download.file("http://www.datacarpentry.org/semester-biology/data/locations.zip",
+              "locations.zip")
+
+unzip("locations.zip")
+```
+
+Before we can loop through these files, we need to get the names of all of these files.
+
+We can do so by using the `list.files()` function.
+
+If we run it without arguments, it will give us the names of all files in the directory.
+
+```{r}
+
+```
+
+We, however, just want the data files we downloaded, so we'll add the optional `pattern` argument to only get the files that start with `"locations-"`. Notice that adding the `-` at the end of the pattern excludes the `location.zip` file name.
+
+```{r}
+
+```
+
+Now that we have our list of file names, we can loop over it.
+
+Perhaps we want to count the number of observations in each file.
+
+First, we create an empty vector to store those counts.
+
+```{r}
+
+```
+
+Now that we have created our empty vector of the appropriate length, we can write our loop to perform the task we want--counting the number of observations (rows) in each file.
+
+```{r}
+
+```
+
+> Start with Question 3a. Note that that question uses different simulated collar data.
+
+## Storing Loop Results in a Data Frame
+
+Often, we want to calculate multiple pieces of information in a loop. When we do this, it is particularly useful to store these results in something other than individual vectors. Instead, we might want to store them in a data frame.
+
+We've actually done a version of this above in the "Looping Over Data Frames" section, where we added an empty column to a data frame.
+
+We can also do so by creating an empty data frame then storing the results from the `for` loop in the `i`th row of the appropriate column.
+
+For example, let's say we want to associate the file name with the observation count and also get the minimum latitude value for each file.
+
+We would start by creating an empty data frame that we will then populate with the results of our loop. We can use the `data.frame` function. Each argument is for one column.
+
+-   "Column Name" = "an empty vector of the correct type and length"
+
+```{r}
+
+```
+
+Let's modify our previous loop.
+
+Instead of storing `count` in `results[i]`, we will need to first specify which column (`count`) in the `results` data frame the value should go in. We can do this with the `$` operator: `results$count[i]`
+
+We also want to store the file name and the minimum latitude in a similar fashion.
+
+```{r}
+
+```
+
+> Work on the rest of the assignment.
