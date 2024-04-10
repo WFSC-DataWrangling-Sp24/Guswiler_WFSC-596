@@ -61,19 +61,19 @@ Note: Your data set does not need to be ecological in nature if you have another
 
 1.  What data are you planning to use for the final project? Describe the data: its contents, its format(s), one or more dataframes, etc. If you have a link to the dataset, please include it. If you have a file that you can upload, please add it to the assignment submission.
 
-    *Answer*: Telemetry data and visual observations from Ecological impact of inside/outside house cats around a suburban nature preserve (.csv files, [Kays and DeWan, 2004](https://www.doi.org/10.5441/001/1.s6t84pb5)).
+    *Answer*: Exploration (s) of objects presented to rats in the Temporal Ordering Memory Task. These exploration times were collected by manually scoring video recordings of the task. There are several files in .csv format that will be imported into data frames and manipulated from there. This data is obtained from Dr. Carol Barnes lab at the Evelyn F. McKnight Brain Institute, UA.
 
 2.  Does this data need to be cleaned in any way to make it tidy? If so, what needs to occur?
 
-    *Answer*: Yes! There is repeated data in certain columns, some unmatched column names, merging of files, and removing unnecessary variables.
+    *Answer*: There is not too much needed in the way of making it tidy, other than joining data frames and creating an age category column. There is a minimum criteria that each rat must meet in order for the scores to be included in analyses and I will write a code to mark underperforming individuals as `NA`.
 
 3.  Speaking generally, what tasks will you perform with this dataset? It might include tasks that we have not yet covered how to accomplish in class, but come up with a general plan that you would like to follow.
 
-    *Answer*: I will clean up the data and use `ctmm` to remake the space use maps. *Answer*: I will clean up the data and use `ctmm` to remake the space use maps.
+    *Answer*: I will create a function to indicate which rats did not reach the minimum criteria to be included in analyses. I will visualize the data using ggplot and will perform several t tests and ANOVAs to compare performance among groups.
 
 4.  One of the requirements of the final project is to make some type of plot using `ggplot2` with the data. What do you plan to plot from your data?
 
-    *Answer*: I will use `ctmm` to plot the home-ranges of each animal (n = 12), and compare them to the original publication (area vs number of fixes, [Figure 4](https://zslpublications-onlinelibrary-wiley-com.ezproxy3.library.arizona.edu/doi/pdf/10.1017/S1367943004001489)).
+    *Answer*: I will plot total exploration during the test phase as well as discrimination ratios (used as an indicator for a rat's ability to discriminate between a familiar/novel object or if it remembers seeing one object before another).
 
 # Reflection
 
