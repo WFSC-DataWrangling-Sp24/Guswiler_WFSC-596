@@ -41,7 +41,7 @@ April 15 at midnight MST
 
 Be sure to load the `tidyverse` to use later in the assignment.
 
-```{r}
+```{r, echo=FALSE}
 library(tidyverse)
 ```
 
@@ -108,7 +108,8 @@ e.  Complete the code below to calculate an area for each pair of `lengths` and 
 lengths = c(1.1, 2.2, 1.6)
 widths = c(3.5, 2.4, 2.8)
 
-areas <- vector(mode = "numeric", length = length(lengths))
+areas <- vector(mode = "numeric",
+                length = length(lengths))
 
 for (i in 1:length(lengths)) {
   areas[i] <- lengths[i] * widths[i]
@@ -134,7 +135,7 @@ b.  Add the results in the vector back to the original data frame. Show the firs
 c.  Calculate the mean mass for each `species` using `dplyr` (no `for` loops).
 
 ```{r}
-dinosaur_lengths <- read_csv("../../data_raw/dinosaur_lengths.csv") # read in the file
+dinosaur_lengths <- read_csv("../../data_raw/dinosaur_lengths.csv") # read in file
 
 mass_from_length <- function(length, species) {
   species <- tolower(species)
@@ -193,7 +194,9 @@ Show the data frame as output.
 
 ```{r}
 download.file("http://www.datacarpentry.org/semester-biology/data/individual_collar_data.zip", destfile = "../../data_raw/individual_collar_data.zip")
-unzip("../../data_raw/individual_collar_data.zip")
+unzip("../../data_raw/individual_collar_data.zip", exdir = "../../data_raw/individual_collar_data")
+
+collar_file_names <- list.files("../../data_raw/individual_collar_data/", "collar-data-.*.txt")
 ```
 
 # Reflection
