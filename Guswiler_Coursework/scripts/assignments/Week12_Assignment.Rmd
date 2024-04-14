@@ -197,6 +197,14 @@ download.file("http://www.datacarpentry.org/semester-biology/data/individual_col
 unzip("../../data_raw/individual_collar_data.zip", exdir = "../../data_raw/individual_collar_data")
 
 collar_file_names <- list.files("../../data_raw/individual_collar_data/", "collar-data-.*.txt")
+
+data <- list()
+
+for (i in 1:length(collar_file_names)) {
+  file <- read_csv(paste("../../data_raw/individual_collar_data/", collar_file_names[i], sep = ""))
+  data[[i]] <- file
+}
+
 ```
 
 # Reflection
