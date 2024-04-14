@@ -211,7 +211,17 @@ Another common thing to do is combine loops with functions by calling one or mor
 For example, let's take the non-vectorized version of our `est_mass` function that returns an estimated mass if the `volume > 5` and `NA` if it's not.
 
 ```{r}
+est_mass <- function(volume, a, b){
+  mass <- if (volume > 5) {
+    a * volume ^ b
+  } else {
+    NA
+  }
+  return(mass)
+}
 
+est_mass(volumes)
+# but you can totally do a vector if you use case_when()
 ```
 
 We can't pass the vector to the function and get back a vector of results because of the `if` statements because `if` statements are not vectorized.
@@ -221,13 +231,34 @@ Instead, we can loop over the values.
 First, we'll create an empty vector to store the results. Then we will loop by index, calling the function for each value of `volumes`.
 
 ```{r}
+masses <- vector("numeric", length(volumes))
 
+for (i in 1:length(volumes)) {
+  mass <- est_mass(volumes[i], a[i], b[i])
+  masses[i] <- mass
+}
+masses
 ```
 
 If we hadn't written the `if`-`else` statement as a function (`est_mass_max`), we could still include it! It would look like this:
 
 ```{r}
+a <- c(2.65, 1.28, 3.29)
+b <- c(0.9, 1.1, 1.2)
+volumes <- c(1.6, 3, 8)
 
+masses <- vector("numeric", length(volumes))
+
+for (i in 1:length(volumes)) {
+  mass <- if(volumes[i] > 5) {
+    a[i] * volumes[i] ^ b[i]
+  } else {
+    NA
+  }
+  masses[i] <- mass
+}
+
+masses
 ```
 
 Realistically, I find myself putting `if`-`else` statements inside `for` loops, like the structure above, rather frequently.
@@ -237,19 +268,54 @@ Realistically, I find myself putting `if`-`else` statements inside `for` loops, 
 By default, when R loops over a data frame, it loops over the columns. Remember, R is oriented to work in vectors, and data frames are organized by converting multiple vectors into the columns.
 
 ```{r}
+volumes <- c(1.6, 3, 8)
+a <- c(2.65, 1.28, 3.29)
+b <- c(0.9, 1.1, 1.2)
 
+vol_data <- data.frame(volume = volumes, a = a, b = b)
+
+for (i in vol_data) {
+  print(i)
+}
+#prints each column of the data frame because R default is to index by column
 ```
 
 To loop over rows, we need to do some extra work. We can loop by index and subset each row.
 
 ```{r}
-
+for (i in 1:nrow(vol_data)) {
+  print(vol_data[i,])   # the blank space specifies that we want all columns
+}
 ```
 
 If we want to use a specific column, we need to specify the column via sub-setting, as well. We can do that 2 different ways.
 
 ```{r}
+volumes <- c(1.6, 3, 8)
+a <- c(2.65, 1.28, 3.29)
+b <- c(0.9, 1.1, 1.2)
 
+masses <- vector("numeric", length(volumes))
+
+# option 1: subset row and column with []
+
+for (i in 1:nrow(vol_data)) {
+  mass <- est_mass(vol_data[i, "volume"], #for col can specify the name of the col helpful incase they move to different positions in the data frame
+                   vol_data[i, "a"],
+                   vol_data[i, "b"])
+  masses[i] <- mass
+}
+masses
+
+# option 2: name specific col with $ then subset by index
+
+for (i in 1:nrow(vol_data)) {
+  mass <- est_mass(vol_data$volume[i],
+                   vol_data$a[i],
+                   vol_data$b[i])
+  masses[i] <- mass
+}
+masses
 ```
 
 An alternative structure (without the created function) might look like this.
@@ -257,7 +323,15 @@ An alternative structure (without the created function) might look like this.
 We can create a new, empty column in the data frame. We can also place the `if`-`else` statement directly into the for loop and reference specific columns with `$` operator and subset by index, as we did above.
 
 ```{r}
+vol_data$mass <- NA # create new empty col in df
 
+for (i in 1:nrow(vol_data)) {
+  mass <- est_mass(vol_data$volume[i],
+                   vol_data$a[i],
+                   vol_data$b[i])
+  vol_data$mass[i] <- mass # puts the answers in the empty col as we would expect
+}
+vol_data
 ```
 
 > Work on Question 2 in the Assignment.
@@ -271,10 +345,9 @@ For example, if we have many similar files, we might want to repeat the same tas
 To demonstrate, let's download some simulated satellite collar data. Make sure you change the file paths accordingly to match the sub-directories in your RStudio Project, as needed.
 
 ```{r}
-download.file("http://www.datacarpentry.org/semester-biology/data/locations.zip",
-              "locations.zip")
+download.file("http://www.datacarpentry.org/semester-biology/data/locations.zip", "../../data_raw/locations.zip")
 
-unzip("locations.zip")
+unzip("../../data_raw/locations.zip", exdir = "../../data_raw/locations/")
 ```
 
 Before we can loop through these files, we need to get the names of all of these files.
@@ -284,13 +357,19 @@ We can do so by using the `list.files()` function.
 If we run it without arguments, it will give us the names of all files in the directory.
 
 ```{r}
-
+list.files("../../data_raw/locations")
 ```
 
 We, however, just want the data files we downloaded, so we'll add the optional `pattern` argument to only get the files that start with `"locations-"`. Notice that adding the `-` at the end of the pattern excludes the `location.zip` file name.
 
 ```{r}
+# if you just unzipped them in a general place and not into their own subfolder
+list.files("../../data_raw/locations",
+           pattern = "locations-")
 
+data_files <- list.files(path = "../../data_raw/locations",
+                         pattern = "locations-")
+data_files
 ```
 
 Now that we have our list of file names, we can loop over it.
