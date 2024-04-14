@@ -1,8 +1,30 @@
 library(tidyverse)
 
 # read in data
-full_data <- read_csv("data_clean/tor_full_data.csv")
-full_data_exclusions <- read_csv("data_clean/tor_full_data_with_exclusions.csv")
+full_data <- read_csv("Guswiler_FinalProject/data_clean/tor_full_data.csv")
+
+# Create new data frame containing only rats that had sufficient exploration
+# Retain only columns relevant to analyses
+# Group by sex, age category, and strain
+analysis_data <- full_data %>% 
+  filter(sufficient_expl == TRUE) %>% 
+  select(barnes_id, strain, age_cat, sex,
+         disc_rat_2min, disc_rat_total,
+         test_first_2min_total_expl_s, test_total_expl_s,
+         test_first_visit_obj_4,
+         sample_1_east_obj_4_s, sample_1_west_obj_4_s,
+         sample_2_east_obj_19_s, sample_2_west_obj_19_s) %>% 
+  group_by(sex, age_cat, strain)
+
+summarise(analysis_data, )
+
+
+
+
+
+
+
+
 
 
 # look at data
