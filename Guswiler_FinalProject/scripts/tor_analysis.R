@@ -14,28 +14,63 @@ analysis_data <- full_data %>%
          test_first_visit_obj_4,
          sample_1_east_obj_4_s, sample_1_west_obj_4_s,
          sample_2_east_obj_19_s, sample_2_west_obj_19_s) %>% 
-  group_by(sex, age_cat, strain)
+  group_by(sex, age_cat)
 
-summarise(analysis_data, )
+# Quick look at group summary data
+analysis_data %>%
+  # discrimination ratios and percent of group that explored obj 4 first during test
+  summarise(n(),
+            mean(disc_rat_2min),
+            mean(disc_rat_total),
+            (sum(test_first_visit_obj_4) / n()) * 100)
+
+analysis_data %>%
+  # test first 2min total exploration
+  summarise(n(),
+            mean(test_first_2min_total_expl_s),
+            median(test_first_2min_total_expl_s),
+            sd(test_first_2min_total_expl_s))
+
+analysis_data %>%
+  # test total exploration
+  summarise(n(),
+            mean(test_total_expl_s),
+            median(test_total_expl_s),
+            sd(test_total_expl_s))
 
 
-
-
-
-
-
-
-
-
-# look at data
-full_data_exclusions %>% 
-  ggplot(aes(age_cat, discrimination_ratio, color = sex)) +
+# Take a look at the data
+analysis_data %>%                     # make these look nicer for the final
+  ggplot(aes(age_cat, disc_rat_2min,
+             color = sex)) +
   geom_boxplot()
+
+analysis_data %>% 
+  ggplot(aes(age_cat, test_total_expl_s,
+             color = sex)) +
+  geom_col()
+
+
+
+
+
+# Make a fn for separating into data frames for tests?
+for_t_test <- function(Data, Category, Sex) {
+  df <- filter(analysis_data,
+               age_cat == Category &
+                 sex == Sex)
+  return(df)
+}
+
+# now how to create a for loop with this to get all our dfs...
+
+
+
 
 
 
 # separate data frames for age and sex
-young_male <- full_data_exclusions %>% 
+young_male <- analysis_data %>% 
   filter(age_cat == "young" & sex == "M")
 
 young_female <- full_data_exclusions %>% 
