@@ -24,6 +24,8 @@ library(tidyverse)
 
 Read .csv files into global environment and merge into a single data frame.
 
+Include metadata file for information on each column.
+
 ```{r, echo = FALSE}
 # Read in files
 animal_info <- read_csv("../data_raw/animal_info.csv")
@@ -48,13 +50,13 @@ There are several factors that need to be accounted for prior to beginning analy
     -   Old = 16.7 months and up
 -   Calculate each rat's Discrimination Ratio for the first 2 minutes of the test phase.
     -   Discrimination Ratio (DR): A metric commonly used to represent recognition memory sensitivity, based off on preferential exploration of an object that is less familiar over an object that is more familiar. A positive DR indicates preferential exploration for the less familiar object, a negative DR indicates preferential exploration of the familiar object, DR = 0 indicates no preference.
-    -   DR = (t~object\ from\ sample\ 1~ - t~object\ from\ sample\ 2~) / T~total~
+    -   DR = (t~object from sample 1~ – t~object from sample 2~) / T~total~
         -   t = exploration time (s)
 -   Rats need to meet an exploration criteria at each phase of the task to encode an event to their memory and recall it. Therefore, individuals with insufficient exploration could confound results if they didn't explore an object during a sample phase and experience that object as novel during the test phase and should be excluded from analyses. Minimum exploration criteria is as follows:
     -   Sample Phases: exploration time for [each]{.underline} object [\>]{.underline} 5 s
     -   Test Phase: total exploration time [\>]{.underline} 10 s
 
-Here is the order of operations to accomplish everything stated above:
+Here is the order of operations in which I will proceed to accomplish everything stated above:
 
 1.  Add Age Category column
 2.  Calculate total exploration during first 2 min of and entire test phase
@@ -66,8 +68,8 @@ full_data <- full_data %>%
   # add age category
   mutate(age_cat =
            case_when(
-             age_at_test_mo >= 20 ~ "old",
-             age_at_test_mo < 17 ~ "young"),
+             age_at_test_mo >= 16.7 ~ "old",
+             age_at_test_mo < 16.7 ~ "young"),
          .before = "strain") %>% 
   # calculate test total exploration
   mutate(test_total_expl_s = test_expl_obj_4_s + test_expl_obj_19_s,
@@ -83,8 +85,10 @@ full_data <- full_data %>%
   print()
 ```
 
+Below, I've created two functions that will mark a rat either `TRUE` or `FALSE` for whether they exhibited sufficient exploration in sample phases 1 and 2 and the test phase.
+
 ```{r}
-# Function to indicate T/F for sufficient exploration from sample phases
+# Function to check for sufficient exploration from sample phases
 check_sample_phase_expl <- function(expl_e,  # sample phase 1|2: time exploring East object
                                     expl_w){ # sample phase 1|2: time exploring West object
   sufficient_expl <- case_when(expl_e < 5 |
@@ -96,7 +100,8 @@ check_sample_phase_expl <- function(expl_e,  # sample phase 1|2: time exploring 
   return(sufficient_expl)
 }
 
-# Function to indicate T/F for sufficient exploration from test phase
+
+# Function to check for sufficient exploration from test phase
 check_test_phase_expl <- function(test_total_expl){ # test: total time exploring both objects
   sufficient_expl <- case_when(test_total_expl < 10
                                ~ FALSE,
@@ -106,10 +111,11 @@ check_test_phase_expl <- function(test_total_expl){ # test: total time exploring
 }
 ```
 
+After loading the functions into the environment, I use them to create new columns for each phase of the task and then merge these columns into a single column to indicate sufficient exploration. Because a single instance of insufficient exploration at any phase results in the exclusion of a rat, the merged column will retain `FALSE` unless all indicate `TRUE`.
+
 ```{r}
-# Apply functions to check for sufficient exploration and merge into a single column
 full_data <- full_data %>%
-  mutate(.after = disc_rat_total,                       #### will choose a better location for this
+  mutate(.after = notes,
          # check sample phase 1 exploration
          sample_1_suff_expl = check_sample_phase_expl(sample_1_east_obj_4_s,
                                                       sample_1_west_obj_4_s),
@@ -126,16 +132,14 @@ full_data <- full_data %>%
                                      ~ TRUE,
                                      .default = FALSE)) %>% 
   # remove individual T/F columns used to create merged column
-  select(!c(sample_1_suff_expl, sample_2_suff_expl, test_suff_expl))
-
+  select(!c(sample_1_suff_expl, sample_2_suff_expl, test_suff_expl)) %>% 
+  print()
 ```
 
-Save data for easier reference later:
+Save this data to the data_clean/ folder for ease of reference.
 
 ```{r}
-# Save data frame in data_clean/
 write_csv(full_data, "../data_clean/tor_full_data.csv")
-
 ```
 
 ## Looking at the Data
