@@ -144,10 +144,69 @@ write_csv(full_data, "../data_clean/tor_full_data.csv")
 
 ## Looking at the Data
 
-If you wish to clean up your environment prior to continuing you can clear the console and environment below and read in the cleaned data file.
+To prevent the workspace from getting cluttered, I clear the environment below before reading in the data just saved above. While loading the data frame, remove rats with insufficient data, select columns relevant to analyses, and create groups for comparisons.
 
 ```{r}
+rm(list = ls())
 
+# read in .csv
+analysis_data <- read_csv("../data_clean/tor_full_data.csv") %>% 
+  # remove rats with insufficient exploration
+  filter(sufficient_expl == TRUE) %>% 
+  # select columns relevant to analysis
+  select(barnes_id, age_cat, sex,
+         disc_rat_2min,
+         test_first_2min_total_expl_s, test_total_expl_s,
+         test_first_visit_obj_4,
+         sample_1_east_obj_4_s, sample_1_west_obj_4_s,
+         sample_2_east_obj_19_s, sample_2_west_obj_19_s) %>% 
+  # group by age category and sex
+  group_by(age_cat, sex)
 ```
 
-## 
+Before blindly running tests to make comparisons among groups, look at some summaries of the raw data to provide a guide.
+
+```{r}
+# Quick look at group summary data
+analysis_data %>%
+  summarise(n(),
+            mean(disc_rat_2min),
+            # % of group that first approached the object from sample 1
+            (sum(test_first_visit_obj_4) / n()) * 100)
+
+
+analysis_data %>%
+  # test first 2min total exploration
+  summarise(n(),
+            mean(test_first_2min_total_expl_s),
+            median(test_first_2min_total_expl_s),
+            sd(test_first_2min_total_expl_s))
+
+analysis_data %>%
+  # test total exploration
+  summarise(n(),
+            mean(test_total_expl_s),
+            median(test_total_expl_s),
+            sd(test_total_expl_s))
+
+
+# Initial visualization of data
+# discrimination ratio
+analysis_data %>%                     # make these look nicer for the final
+  ggplot(aes(age_cat, disc_rat_2min,
+             color = sex)) +
+  geom_boxplot() +
+  geom_abline(slope = 0,
+              intercept = 0.0,
+              linetype = "dotted")
+
+
+# total exploration
+analysis_data %>% 
+  ggplot(aes(age_cat, test_total_expl_s,
+             color = sex)) +
+  geom_col()
+# appears to be similar performance and exploration between sexes, within age categories
+
+# Let's perform some tests to confirm this
+```

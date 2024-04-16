@@ -9,7 +9,7 @@ full_data <- read_csv("Guswiler_FinalProject/data_clean/tor_full_data.csv")
 analysis_data <- full_data %>% 
   filter(sufficient_expl == TRUE) %>% 
   select(barnes_id, strain, age_cat, sex,
-         disc_rat_2min, disc_rat_total,
+         disc_rat_2min,
          test_first_2min_total_expl_s, test_total_expl_s,
          test_first_visit_obj_4,
          sample_1_east_obj_4_s, sample_1_west_obj_4_s,
@@ -21,7 +21,6 @@ analysis_data %>%
   # discrimination ratios and percent of group that explored obj 4 first during test
   summarise(n(),
             mean(disc_rat_2min),
-            mean(disc_rat_total),
             (sum(test_first_visit_obj_4) / n()) * 100)
 
 analysis_data %>%
