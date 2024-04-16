@@ -9,57 +9,141 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Temporal Ordering Memory task. Data from Evelyn F. McKnight Brain Institute, University of Arizona. All rights and use of this data is reserved to the lab of Dr. Carol Barnes and is not available for reproduction or personal use.
+Temporal Ordering Memory Task. Data from Evelyn F. McKnight Brain Institute, University of Arizona. All rights and use of this data is reserved to the lab of Dr. Carol Barnes and is not available for reproduction or personal use.
 
 ## Setup
 
 Install and load necessary packages.
 
-```{r}
-# Install required packages if you do not already have them
+```{r, echo = FALSE}
 # install.packages("tidyverse")
-
 library(tidyverse)
 ```
 
-## Data Import
+## Data Import and Make Tidy
+
+Read .csv files into global environment and merge into a single data frame.
 
 ```{r, echo = FALSE}
-# Read .csv files into workspace environment
+# Read in files
+animal_info <- read_csv("../data_raw/animal_info.csv")
+sample_1 <- read_csv("../data_raw/sample_1_obj_4.csv")
+sample_2 <- read_csv("../data_raw/sample_2_obj_19.csv")
+test <- read_csv("../data_raw/test.csv")
 
+# Merge
+full_data <- animal_info %>% 
+  left_join(sample_1) %>% 
+  left_join(sample_2) %>% 
+  left_join(test) %>% 
+  print()
 ```
 
-Merge the data into one data frame.
+There are several factors that need to be accounted for prior to beginning analyses:
+
+-   Calculate Total Exploration during the first 2 minutes of the test phase and entire 4 minutes of the test phase.
+    -   The first 2 minutes of exploration activity has been shown to be more indicative of recognition memory than exploration exhibited during later in the test phase, therefore we use only the first 2 minutes to infer recognition.
+-   Determine each rat's Age Category based on their Age at Test.
+    -   Young = 6 to 16.6 months
+    -   Old = 16.7 months and up
+-   Calculate each rat's Discrimination Ratio for the first 2 minutes of the test phase.
+    -   Discrimination Ratio (DR): A metric commonly used to represent recognition memory sensitivity, based off on preferential exploration of an object that is less familiar over an object that is more familiar. A positive DR indicates preferential exploration for the less familiar object, a negative DR indicates preferential exploration of the familiar object, DR = 0 indicates no preference.
+    -   DR = (t~object\ from\ sample\ 1~ - t~object\ from\ sample\ 2~) / T~total~
+        -   t = exploration time (s)
+-   Rats need to meet an exploration criteria at each phase of the task to encode an event to their memory and recall it. Therefore, individuals with insufficient exploration could confound results if they didn't explore an object during a sample phase and experience that object as novel during the test phase and should be excluded from analyses. Minimum exploration criteria is as follows:
+    -   Sample Phases: exploration time for [each]{.underline} object [\>]{.underline} 5 s
+    -   Test Phase: total exploration time [\>]{.underline} 10 s
+
+Here is the order of operations to accomplish everything stated above:
+
+1.  Add Age Category column
+2.  Calculate total exploration during first 2 min of and entire test phase
+3.  Calculate the discrimination ratios from exploration during first 2 min of test phase
+4.  Create and apply a function that will indicate whether the rat had in/sufficient exploration during any phase of the task.
 
 ```{r}
-
+full_data <- full_data %>% 
+  # add age category
+  mutate(age_cat =
+           case_when(
+             age_at_test_mo >= 20 ~ "old",
+             age_at_test_mo < 17 ~ "young"),
+         .before = "strain") %>% 
+  # calculate test total exploration
+  mutate(test_total_expl_s = test_expl_obj_4_s + test_expl_obj_19_s,
+         .after = test_expl_obj_19_s) %>% 
+  # calculate test first 2 min total exploration
+  mutate(test_first_2min_total_expl_s =
+           test_first_2min_expl_obj_4_s + test_first_2min_expl_obj_19_s,
+         .after = test_first_2min_expl_obj_19_s) %>% 
+  # calculate first 2 min DR
+  mutate(disc_rat_2min = 
+           (test_first_2min_expl_obj_4_s - test_first_2min_expl_obj_19_s) / test_first_2min_total_expl_s,
+         .after = test_first_2min_total_expl_s) %>% 
+  print()
 ```
-
-Observed issues:
-
--   Repetition of strings in the same cell, most often `General:General`.
-
--   Behavior categorized as `General` with the inclusion of another behavior.
-
--   One instance of non-conforming value `Sleep` == `Sleeping`
-
-Decided order of operation:
-
-1.  
 
 ```{r}
+# Function to indicate T/F for sufficient exploration from sample phases
+check_sample_phase_expl <- function(expl_e,  # sample phase 1|2: time exploring East object
+                                    expl_w){ # sample phase 1|2: time exploring West object
+  sufficient_expl <- case_when(expl_e < 5 |
+                                 expl_w < 5
+                               ~ FALSE,
+                               expl_e >= 5 |
+                                 expl_w >= 5
+                               ~ TRUE)
+  return(sufficient_expl)
+}
 
+# Function to indicate T/F for sufficient exploration from test phase
+check_test_phase_expl <- function(test_total_expl){ # test: total time exploring both objects
+  sufficient_expl <- case_when(test_total_expl < 10
+                               ~ FALSE,
+                               test_total_expl >= 10
+                               ~ TRUE)
+  return(sufficient_expl)
+}
 ```
-
-Remove columns containing unnecessary or repeated information.
 
 ```{r}
-
-
-# Save this cleaned data for easy reference
+# Apply functions to check for sufficient exploration and merge into a single column
+full_data <- full_data %>%
+  mutate(.after = disc_rat_total,                       #### will choose a better location for this
+         # check sample phase 1 exploration
+         sample_1_suff_expl = check_sample_phase_expl(sample_1_east_obj_4_s,
+                                                      sample_1_west_obj_4_s),
+         # check sample phase 2 exploration
+         sample_2_suff_expl = check_sample_phase_expl(sample_2_east_obj_19_s,
+                                                      sample_2_west_obj_19_s),
+         # check test exploration
+         test_suff_expl = check_test_phase_expl(test_total_expl_s)) %>% 
+  # merge all T/F columns into one, marking F unless all are T
+  mutate(.before = sample_1_suff_expl,
+         sufficient_expl = case_when(sample_1_suff_expl == TRUE &
+                                       sample_2_suff_expl == TRUE &
+                                       test_suff_expl == TRUE
+                                     ~ TRUE,
+                                     .default = FALSE)) %>% 
+  # remove individual T/F columns used to create merged column
+  select(!c(sample_1_suff_expl, sample_2_suff_expl, test_suff_expl))
 
 ```
+
+Save data for easier reference later:
+
+```{r}
+# Save data frame in data_clean/
+write_csv(full_data, "../data_clean/tor_full_data.csv")
+
+```
+
+## Looking at the Data
 
 If you wish to clean up your environment prior to continuing you can clear the console and environment below and read in the cleaned data file.
 
-## Looking at the Data
+```{r}
+
+```
+
+## 
