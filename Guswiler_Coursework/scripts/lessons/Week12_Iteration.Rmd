@@ -345,7 +345,8 @@ For example, if we have many similar files, we might want to repeat the same tas
 To demonstrate, let's download some simulated satellite collar data. Make sure you change the file paths accordingly to match the sub-directories in your RStudio Project, as needed.
 
 ```{r}
-download.file("http://www.datacarpentry.org/semester-biology/data/locations.zip", "../../data_raw/locations.zip")
+download.file("http://www.datacarpentry.org/semester-biology/data/locations.zip",
+              "../../data_raw/locations.zip")
 
 unzip("../../data_raw/locations.zip", exdir = "../../data_raw/locations/")
 ```
@@ -379,13 +380,27 @@ Perhaps we want to count the number of observations in each file.
 First, we create an empty vector to store those counts.
 
 ```{r}
-
+num_files <- length(data_files)
+results <- vector("numeric", length = num_files)
+# or
+results <- vector("numeric", length = length(data_files))
 ```
 
 Now that we have created our empty vector of the appropriate length, we can write our loop to perform the task we want--counting the number of observations (rows) in each file.
 
 ```{r}
+for (i in 1:length(data_files)) {
+  # specify the file
+  filename <- data_files[i]
+  # read in txt file
+  data <- read_csv(paste0("../../data_raw/locations/", filename))
+  # save number of rows per file
+  results[i] <- nrow(data)
+}
 
+results
+
+# to double check/troubleshoot your for loop you can set i = a number in list and check that it correctly pulls that specific item in the list and puts it in the correct spot
 ```
 
 > Start with Question 3a. Note that that question uses different simulated collar data.
@@ -405,7 +420,9 @@ We would start by creating an empty data frame that we will then populate with t
 -   "Column Name" = "an empty vector of the correct type and length"
 
 ```{r}
-
+results_df <- tibble(file_name = vector("character", length(data_files)),
+                     count = vector("integer", length(data_files)),
+                     min_lat = vector("numeric", length(data_files)))
 ```
 
 Let's modify our previous loop.
@@ -415,7 +432,16 @@ Instead of storing `count` in `results[i]`, we will need to first specify which 
 We also want to store the file name and the minimum latitude in a similar fashion.
 
 ```{r}
-
+for (i in 1:length(data_files)) {
+  # read in the file
+  filename <- data_files[i]
+  data <- read_csv(paste0("../../data_raw/locations/", filename))
+  # add info to the df
+  results_df$file_name[i] <- filename
+  results_df$count[i] <- nrow(data)
+  results_df$min_lat[i] <- min(data$lat)
+}
+results_df
 ```
 
 > Work on the rest of the assignment.
