@@ -242,9 +242,18 @@ This reflection is worth 25 points, separate from your Week 12 assignment. Refle
 
 Write about 5 sentences addressing *at least* one of the following questions.
 
--   What has worked well for you in this course for you so far?
--   What has been particularly challenging for you so far?
--   Is there anything that I can do to help your learning in the course?
--   Other reflections about the content of the course that you would like to share.
+1.  What has worked well for you in this course for you so far?
 
-*Answer*:
+    *Answer: The flexibility with assignment due dates and providing information on the final project so early in the semester. It allowed me to get a head start on the project and made this busy time of year a bit less stressful.*
+
+2.  What has been particularly challenging for you so far?
+
+    *Answer: The for loops tripped me up a bit, particularly when to reference [i] in the loop.*
+
+3.  Is there anything that I can do to help your learning in the course?
+
+    *Answer: Nope, you've been doing great!*
+
+4.  Other reflections about the content of the course that you would like to share.
+
+    *Answer: It was nice having Jeff in go over how to work with spatial data, even though we didn't get through everything during the lecture, it was very helpful and informative.*
