@@ -99,7 +99,7 @@ it probably means you need to load the terra library with
 `library(terra)`.
 
 ```{r read-temperature-data}
-global_temp <- rast("../../documents/image_files/global_temperature.tif")
+temp_global <- rast("../../documents/image_files/global_temperature.tif")
 ```
 
 With raster data, they will all (ideally) contain metadata - we can see
@@ -107,9 +107,7 @@ those metadata by running a line of code with the name of the variable
 that that we read the raster into:
 
 ```{r print-temperature-data}
-global_temp
-# or
-print(global_temp)
+temp_global
 # extent   : -180, 180, -90, 90  (xmin, xmax, ymin, ymax)
 # min value: -54.75917 
 # max value: 31.16667 
@@ -128,7 +126,7 @@ But come on! We are here for maps. Let us see a map! We can plot the
 actual data stored in the raster with the `plot()` command.
 
 ```{r plot-global-temperature-data}
-plot(global_temp)
+plot(temp_global)
 
 # if you want to use ggplot2 with terra, there is a package you need
 #  called "tidyterra"
@@ -197,19 +195,19 @@ Finally, we can make a new map, with only those values in the area we
 defined by our geographic extent with the `crop()` function from terra.
 
 ```{r crop-temperature-data}
-sw_temp <- crop(global_temp, southwest_ext)
+temp_sw <- crop(temp_global, southwest_ext)
 ```
 
 We can then compare the objects of our original raster:
 
 ```{r uncropped-temp}
-global_temp
+temp_global
 ```
 
 to the cropped raster:
 
 ```{r cropped-temp}
-sw_temp
+temp_sw
 ```
 
 Just about all the data changed, with the exception of the value in the
@@ -219,7 +217,7 @@ Let us look at the map of our cropped data, again with the `plot()`
 function.
 
 ```{r plot-cropped-temp}
-plot(sw_temp)
+plot(temp_sw)
 ```
 
 ### Modifying data
@@ -241,14 +239,14 @@ $$
 
 ```{r temp-conversion}
 # (C * 9/5) + 32 = F
-sw_temp_f <- (sw_temp * 9/5) + 32
+temp_sw_f <- (temp_sw * 9/5) + 32
 ```
 
 And plotting the data, the image looks the pretty much the same, but
 note the scale is different:
 
 ```{r plot-fahrenheit}
-plot(sw_temp_f)
+plot(temp_sw_f)
 
 # Can look at the meta data or the scale on the side to see that we are now in F
 ```
@@ -275,7 +273,7 @@ three- dimensional data are transformed into two-dimensional space.
 Let us look once more at our cropped temperature raster metadata.
 
 ```{r show-wgs84}
-sw_temp
+temp_sw
 # coord. ref.: lon/lat WGS 84 (EPSG:4326)
 # how our 3D data is transferred into 2D
 
@@ -295,7 +293,7 @@ near the poles. You can see this in action by plotting your original
 map:
 
 ```{r show-pole-distortion}
-plot(global_temp)
+plot(temp_global)
 ```
 
 Look at Antarctica! It's huge!
@@ -314,9 +312,9 @@ projection that does not distort the area quite as much. We do this with
 the terra function `project()` and then plot the result:
 
 ```{r reproject-temp}
-sw_temp_reproject <- project(sw_temp, "epsg:5070")
-plot(sw_temp_reproject)
-sw_temp_reproject
+temp_sw_reproject <- project(temp_sw, "epsg:5070")
+plot(temp_sw_reproject)
+temp_sw_reproject
 ```
 
 > Question: What is the name of the coordinate system that EPSG 5070
@@ -333,7 +331,7 @@ documentation one of the functions for creating color palettes, called
 
 ```{r color-documentation, eval = FALSE}
 # Brings up R documentation for some color palettes
-
+?rainbow
 ```
 
 This actually brings up documentation for a bunch of palettes, but
@@ -343,7 +341,8 @@ try passing the rainbow palette to the plot function, giving it fifty
 colors:
 
 ```{r rainbow-colors}
-
+plot(temp_sw,
+     col = rainbow(n = 50))
 ```
 
 Well, the colors changed, but I would not say for the better. In fact,
@@ -363,7 +362,8 @@ To use these palettes, we replace the `rainbow()` function with the
 `palette` argument:
 
 ```{r pick-colors}
-
+plot(temp_sw,
+     col = hcl.colors(n = 50, palette = "YlOrBr"))
 ```
 
 This is close, but I'd rather reverse the scale, so darker colors
@@ -372,8 +372,9 @@ stores these colors so I do not have to keep writing out the
 `hcl.colors()` specification.
 
 ```{r reverse-colors}
+temp_cols <- rev(hcl.colors(n = 50, palette = "YlOrBr"))
 
-
+plot(temp_sw, col = temp_cols)
 ```
 
 > Question: What are the values stored in the `temp_cols` variable?
@@ -404,7 +405,7 @@ reference system as the temperature data we already loaded
 in.]{.underline}
 
 ```{r cities-vector}
-cities_vect <- vect(cities, crs = crs(sw_temp))
+cities_vect <- vect(cities, crs = crs(temp_sw))
 ```
 
 Looking at the SpatVector object, it doesn't really look very different.
@@ -418,7 +419,7 @@ use `add = TRUE` in our second call to `plot()` so it adds the points to
 the already existing map.
 
 ```{r add-cities-points}
-plot(sw_temp)
+plot(temp_sw)
 plot(cities_vect, add = TRUE)
 ```
 
@@ -426,7 +427,7 @@ Finally, because we stored the names of the cities in our data frame, we
 can also add those.
 
 ```{r add-cities-names}
-plot(sw_temp)
+plot(temp_sw)
 plot(cities_vect, add = TRUE)
 text(cities_vect,
      labels = "city",
@@ -514,11 +515,11 @@ reality check.
 
 ```{r desert-to-polygon}
 # Change all FALSE values to missing data
-
+prec_desert[!prec_desert] <- NA
 # Convert remaining non-missing values to a polygon (vector data)
-
+desert_poly <- as.polygons(prec_desert)
 # Plot polygons (reality check)
-
+plot(desert_poly)
 ```
 
 Looking good! Now we can plot our temperature map again and add the
@@ -529,9 +530,9 @@ to do this).
 
 ```{r add-desert}
 # Plot base temperature map
-
+plot(temp_sw, col = temp_cols)
 # Add desert polygon
-
+polys(x = desert_poly)
 ```
 
 Finally, because we are being pedantic, let us make the plot again, this
@@ -539,9 +540,9 @@ time adding a title explaining what the colors mean ("00B0" is Unicode
 for the degree symbol).
 
 ```{r add-title}
-
-
-
+plot(temp_sw, col = temp_cols, 
+     main = "Mean Annual Temperature (\u00B0C)")
+polys(x = desert_poly)
 ```
 
 And if you are inclined, you can output this map by wrapping all the
@@ -550,11 +551,11 @@ plotting commands within a call to one of the graphics device functions
 with `dev.off()`.
 
 ```{r save-plot}
-
+png(filename = "../../outputs/sw-desert-heat.png")
 plot(temp_sw, col = temp_cols, 
      main = "Mean Annual Temperature (\u00B0C)")
 polys(x = desert_poly)
-
+dev.off()
 ```
 
 ## Glossary
