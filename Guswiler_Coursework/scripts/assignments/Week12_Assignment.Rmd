@@ -137,6 +137,7 @@ c.  Calculate the mean mass for each `species` using `dplyr` (no `for` loops).
 ```{r}
 dinosaur_lengths <- read_csv("../../data_raw/dinosaur_lengths.csv") # read in file
 
+# create function to calculate masses
 mass_from_length <- function(length, species) {
   species <- tolower(species)
   mass <- case_when(species == "stegosauria" 
@@ -161,7 +162,7 @@ for (i in 1:length(dinosaur_lengths$lengths)) {
 head(dinosaur_masses)
 
 #1b
-dinosaur_lengths <- dinosaur_lengths %>% 
+dinosaur_lengths <- dinosaur_lengths %>% # add masses to df
   mutate(masses = dinosaur_masses)
 
 head(dinosaur_lengths)
@@ -193,18 +194,46 @@ b.  Add code to the loop to calculate the minimum and maximum latitude in the fi
 Show the data frame as output.
 
 ```{r}
-download.file("http://www.datacarpentry.org/semester-biology/data/individual_collar_data.zip", destfile = "../../data_raw/individual_collar_data.zip")
-unzip("../../data_raw/individual_collar_data.zip", exdir = "../../data_raw/individual_collar_data")
+# download and unzip files
+download.file("http://www.datacarpentry.org/semester-biology/data/individual_collar_data.zip",
+              destfile = "../../data_raw/individual_collar_data.zip")
+unzip("../../data_raw/individual_collar_data.zip",
+      exdir = "../../data_raw/individual_collar_data")
 
-collar_file_names <- list.files("../../data_raw/individual_collar_data/", "collar-data-.*.txt")
+# make list of file names
+collar_file_names <- list.files("../../data_raw/individual_collar_data/",
+                                "collar-data-.*.txt")
 
-data <- list()
-
+#3a
 for (i in 1:length(collar_file_names)) {
-  file <- read_csv(paste("../../data_raw/individual_collar_data/", collar_file_names[i], sep = ""))
-  data.frame(i) <- 
+  # read in the file
+  collar_data <- read_csv(show_col_types = FALSE,
+                          paste0("../../data_raw/individual_collar_data/",
+                                 collar_file_names[i]))
+  # plot long and lat values for each file
+  print(ggplot(collar_data, aes(long, lat)) +
+          geom_line() +
+          labs(title = paste0("Location Tracking of Collar ", collar_data$collar),
+               x = "Longitude",
+               y = "Latitude"))
 }
 
+#3b
+# create empty data frame
+collar_df <- tibble(file_name = vector("character", length(collar_file_names)),
+                    min_lat = vector("numeric", length(collar_file_names)),
+                    max_lat = vector("numeric", length(collar_file_names)))
+
+for (i in 1:length(collar_file_names)) {
+  # read in the file
+  collar_data <- read_csv(paste0("../../data_raw/individual_collar_data/",
+                          collar_file_names[i]))
+  # add info to the empty data frame
+  collar_df$file_name[i] <- collar_file_names[i]
+  collar_df$min_lat[i] <- max(collar_data$lat)
+  collar_df$max_lat[i] <- min(collar_data$lat)
+}
+collar_df
 ```
 
 # Reflection
