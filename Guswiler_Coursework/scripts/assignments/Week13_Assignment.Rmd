@@ -79,6 +79,7 @@ himalaya_ext <- ext(c(69, 97, 26, 40))
 #1d
 precip_himalaya <- crop(precip_global, himalaya_ext)
 precip_himalaya
+# nrow = 336, ncol = 672, nlyr = 1
 ```
 
 ### 2. Printing maps (20 points)
@@ -103,13 +104,20 @@ plot(precip_himalaya)
 
 #2b
 plot(precip_himalaya,
-     main = "Mean Annual Precipitation of the Himalayan Region")
+     main = "Mean Annual Precipitation (mm)")
 
 #2c
-?topo.colors
+plot(precip_himalaya,
+     main = "Mean Annual Precipitation (mm)",
+     col = topo.colors(n = 50))
+
+#2d
+plot(precip_himalaya,
+     main = "Mean Annual Precipitation (mm)",
+     col = rev(hcl.colors(n = 50, palette = "YlGnBu")))
 ```
 
-###  3. Working with vector data in terra (20 points)
+### 3. Working with vector data in terra (20 points)
 
 a.  Create a data frame of three peaks in the Himalayan region: (lat,
     lon)
@@ -125,6 +133,28 @@ c.  Convert the points SpatVector object to a lines object.
 d.  Add the lines object to the precipitation plot of the Himalayan
     region.
 
+```{r}
+#3a
+peaks <- data.frame(peak = c("K2", "Annapurna", "Mount Everest"),
+                    lat = c(35.93, 28.53, 28.05),
+                    lon = c(76.50, 83.81, 86.91))
+peaks
+
+#3b
+peaks_vect <- vect(peaks, crs = crs(precip_himalaya))
+peaks_vect
+
+#3c
+peaks_line <- as.lines(peaks_vect)
+peaks_line
+
+#3d
+plot(precip_himalaya,
+     main = "Mean Annual Precipitation (mm)",
+     col = rev(hcl.colors(n = 50, palette = "YlGnBu")))
+plot(peaks_line, add = TRUE)
+```
+
 ### 4. Modifying raster values (20 points)
 
 a.  Load in the elevation data ("global_elevation.tif"), what are the
@@ -137,9 +167,53 @@ c.  Crop the elevation data to the same geographic extent as
 
 d.  Plot the Himalayan elevation data.
 
+```{r}
+#4a
+elev_global <- rast("../../documents/image_files/global_elevation.tif")
+elev_global
+# meters
+
+#4b
+elev_global_ft <- elev_global * 3.28084
+elev_global_ft
+
+#4c
+elev_himalaya <- crop(elev_global, himalaya_ext)
+elev_himalaya
+
+#4d
+plot(elev_himalaya,
+     main = "Elevation (m)")
+```
+
 ### 5. Converting raster objects to spatial vector objects (20 points)
 
 For this last exercise, create a plot that shows precipitation for the
 Himalayan region, using a color palette from ColorBrewer AND add a layer
 that is partially (50%) transparent to shade out regions below 13,000
 feet.
+
+```{r}
+# crop elev (ft) to himalaya region
+himalaya_ft <- crop(elev_global_ft, himalaya_ext)
+
+# apply logic: is cell value less than 13000 ft
+himalaya_13000ft_min <- himalaya_ft < 13000 
+
+# false values changed to NA
+himalaya_13000ft_min[!himalaya_13000ft_min] <- NA
+
+# make a polygon from logical himalaya raster
+himalaya_poly_ft <- as.polygons(himalaya_13000ft_min)
+
+
+plot(precip_himalaya,    # plot precip data
+     main = "Mean Annual Precipitation (mm)",
+     col = rev(hcl.colors(n = 50,
+                          palette = "YlGnBu")))
+polys(himalaya_poly_ft,     # add polygon to plot
+      col = "black",        # change fill color to black
+      alpha = 0.5,          # set transparency to 50%
+      border = FALSE)       # remove polygon outline
+
+```
