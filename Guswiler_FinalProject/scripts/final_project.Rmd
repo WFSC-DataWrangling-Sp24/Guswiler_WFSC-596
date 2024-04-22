@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Temporal Ordering Memory Task. Data from Evelyn F. McKnight Brain Institute, University of Arizona. All rights and use of this data is reserved to the lab of Dr. Carol Barnes and is not available for reproduction or personal use.
 
-## Setup
+# Setup
 
 Install and load necessary packages.
 
@@ -20,7 +20,9 @@ Install and load necessary packages.
 library(tidyverse)
 ```
 
-## Data Import and Make Tidy
+# Data Import and Make Tidy
+
+## Import Data
 
 Read .csv files into global environment and merge into a single data frame.
 
@@ -40,6 +42,8 @@ full_data <- animal_info %>%
   left_join(test) %>% 
   print()
 ```
+
+## How to Proceed
 
 There are several factors that need to be accounted for prior to beginning analyses:
 
@@ -62,6 +66,8 @@ Here is the order of operations in which I will proceed to accomplish everything
 2.  Calculate total exploration during first 2 min of and entire test phase
 3.  Calculate the discrimination ratios from exploration during first 2 min of test phase
 4.  Create and apply a function that will indicate whether the rat had in/sufficient exploration during any phase of the task.
+
+## Make Tidy
 
 ```{r}
 full_data <- full_data %>% 
@@ -142,7 +148,7 @@ Save this data to the data_clean/ folder for ease of reference.
 write_csv(full_data, "../data_clean/tor_full_data.csv")
 ```
 
-## Looking at the Data
+# Looking at the Data
 
 To prevent the workspace from getting cluttered, I clear the environment below before reading in the data just saved above. While loading the data frame, remove rats with insufficient data, select columns relevant to analyses, and create groups for comparisons.
 
@@ -164,6 +170,8 @@ analysis_data <- read_csv("../data_clean/tor_full_data.csv") %>%
   group_by(age_cat, sex)
 ```
 
+## Summarize
+
 Before blindly running tests to make comparisons among groups, look at some summaries of the raw data to provide a guide.
 
 ```{r}
@@ -181,27 +189,68 @@ analysis_data %>%
             sd(test_total_expl_s))
 ```
 
-Right away, it can be seen that there appears to be a greater difference in performance between age rather than sex. Let's visualize the data before going forward.
+## Visualize
+
+Right away, it can be seen that there appears to be a greater difference in performance between age rather than sex. Visualize the data before going forward.
 
 ```{r}
-# discrimination ratio
-analysis_data %>%                     # make these look nicer
+# Discrimination ratio box plot
+analysis_data %>%
   ggplot(aes(age_cat, disc_rat_2min,
-             color = sex)) +
+             # fill colors by sex
+             fill = sex)) +
   geom_boxplot() +
-  geom_point(position = position_dodge(width = 0.75),
-             aes(group = sex)) +
+  # add points by age and sex over corresponding box
+  geom_point(position = position_dodge(width = 0.75)) +
+  # add line at y = 0
   geom_abline(slope = 0,
               intercept = 0.0,
-              linetype = "dotted")
+              linetype = "dotted") +
+  # change y-axis limit to -1.0:1.0
+  expand_limits(y = 1.0) +
+  # change main and axes titles
+  labs(title = "TOR Test Performance",
+       x = "Age Category",
+       y = "Discrimination Ratio") +
+  # change legend title
+  guides(fill = guide_legend(title = "Sex")) +
+  theme_classic()
 
-
-# total exploration
+# Total exploration bar plot
 analysis_data %>% 
   ggplot(aes(age_cat, test_total_expl_s,
-             color = sex)) +
-  geom_col()
-# appears to be similar performance and exploration between sexes, within age categories
+             fill = sex)) +
+  geom_bar(position = "dodge",
+           stat = "identity",
+           width = 0.75) +
+  # change main and axes titles
+  labs(title = "TOR Total Test Exploration",
+       x = "Age Category",
+       y = "Exploration (s)") +
+  # change legend title
+  guides(fill = guide_legend(title = "Sex")) +
+  theme_classic()
+```
 
-# Let's perform some tests to confirm this
+There appears to be similar test performance and exploration between sexes, within age categories. Perform some analyses to confirm this.
+
+# Analyses
+
+To make the process of comparisons among groups easier, first split up the data data frames based on age and sex.
+
+```{r}
+# Obtain the group names that will become the data frame names
+naming <- unite(group_keys(analysis_data),
+                "group", age_cat, sex)
+
+# Create the data frames
+by_group_data <- analysis_data %>% 
+  # split the original data frames by groupings
+  group_split() %>% 
+  # name them based on the vector we created earlier
+  set_names(nm = naming$group) %>% 
+  # add these to our working environment
+  list2env(envir = .GlobalEnv)
+
+head()
 ```
