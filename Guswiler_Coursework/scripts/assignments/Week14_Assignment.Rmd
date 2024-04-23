@@ -1,0 +1,89 @@
+---
+title: "Week 14 Assignment"
+output: pdf_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Assignment
+
+### Purpose
+
+The goal of this assignment is to practice using parallelization.
+
+### Task
+
+Write R code to successfully answer each question below.
+
+### Criteria for Success
+
+-   Code is within the provided code chunks or new code chunks are created where necessary
+-   Code chunks run without errors
+-   Code chunks have brief comments indicating which code is answering which part of the question
+-   Code will be assessed as follows:
+    -   Produces the correct answer using the requested approach: 100%
+    -   Generally uses the right approach, but a minor mistake results in an incorrect answer: 90%
+    -   Attempts to solve the problem and makes some progress using the core concept, but returns the wrong answer and does not demonstrate comfort with the core concept: 50%
+    -   Answer demonstrates a lack of understanding of the core concept: 0%
+-   Any questions requiring written answers are answered with sufficient detail
+
+### Due Date
+
+April 29 at midnight MST
+
+# Assignment Exercises
+
+### 1. Set Up (10 points)
+
+We will use a number of packages to complete this week's assignments. Load in the following packages: `tidyverse`, `foreach`, and `doParallel`.
+
+### 2. Use `apply` functions (20 points)
+
+Let's practice using `lapply` and the mutli-core cousin, `mclapply`.
+
+Run the following code chunk to create a list to use as our data object.
+
+```{r}
+seq_list <- as.list(seq(1, 500, by = 5))
+```
+
+Use the `head` function to look at the `seq_list` object. You will notice that the output looks different from the vectors and dataframes that we are used to looking at. That is because it is a list, a collection of data objects. But don't worry! The code for `lapply` and `mclapply` is the same as in the lesson.
+
+(a) Use `lapply` to take the square root of each number in `seq_list` (using the `sqrt` function). Then use `do.call` to covert the output into a dataframe. Use the `head` function to print the first 6 rows of the output.
+
+(b) Use `mclapply` to do the same thing. Remember to set up the number of cores you will use, first.
+
+### 3. Use `foreach` (35 points)
+
+Use the `source` function to bring in the `mass_from_length` function (from Week 12's assignment) in the `dino_allometry_fxn.R` script. You will also want to read in the `dinosaur_lengths.csv` file.
+
+(a) First, write out a `for` loop that uses the `mass_from_length` function and stores the results in an empty vector. This is the same as Question 2a from Week 12.
+
+(b) Now, do the same thing, except use the `foreach` and `%do%` operator. Use `.combine = c` because the output is an individual value rather than a row.
+
+(c) Now, use parallel processing with the `%dopar%` operator. Remember to register and stop your cluster of cores.
+
+(d) Go back through all of your code for question 3 and explicitly call all of the functions that you use. The ones you've written yourself do not need to be explicitly called.
+
+### 4. Forest Change through Time (35 points)
+
+The following code chunk reads in data about how much forested area is in each country. You might need to edit the file path to match your project structure.
+
+```{r}
+forest <- read_csv("forest_per_country.csv", 
+                   skip = 4, col_names = TRUE) %>% 
+  select(-`2022`)
+```
+
+The `forest` data is not a fully cleaned dataset, especially when we look at the column names. You can either use the `rename()` function to rename them or encompass the names with back ticks in your `for` loops.
+
+(a) Write a for loop that calculates the change in forest per country from 1990 to 2021 by subtracting the 1990 value from the 2021 value.
+
+The output should be stored in a vector called `change_in_forest`. Print the head of `change_in_forest`.
+
+(b) Perform the same task as in (a) using the `foreach` function and the `%do%` operator. Use the `.combine = rbind` argument to save the output as a dataframe.
+
+(c) Do the same as in (b) but use parallel processing and the `%dopar%` operator.
