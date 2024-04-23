@@ -26,7 +26,7 @@ To understand what we are about to do, let's take a look at this diagram below. 
 
 The processor below is a CPU (central processing unit) that retrieves data and runs instructions. Most modern computers have more than one CPU these days.
 
-Within the CPU, we can have cores. Each core is capable of retrieving data and performing tasks.
+Within the CPU, we have cores. Each core is capable of retrieving data and performing tasks.
 
 ![](https://github.com/ljdursi/beyond-single-core-R/blob/master/images/sockets-cores.png?raw=true)
 
@@ -37,6 +37,8 @@ This lesson will demonstrate 2 different ways to harness the power of our compte
 1.  through the `mclapply` function in the `parallel` package
 2.  through combined use of `foreach` from the `foreach` package and the `%dopar%` operator in the `doParallel` package
 
+You can't parallelize your code if you need to go from x -\> y -\> z (can't be dependent on a process above or below it). We want to complete tasks on several different features, we break up our process into the different tasks, run them on separate cores, then combine them at the end for our output.
+
 ### Setup
 
 We will be using a handful of new packages while learning about parallelization in R, and it is good practice to install and load those packages at the top of the script, so let's go ahead and do so.
@@ -46,13 +48,18 @@ The `parallel` package is already installed with R, so we do not need to install
 We will also be using the `tidyverse` and `portalr`, so install those onto your computer as well, if you haven't already.
 
 ```{r install-pkgs, eval = FALSE}
-
+# install.packages("foreach")
+# install.packages("doParallel")
 ```
 
 And we load them into our working environment with the `library()` command.
 
-```{r terra-load, echo = FALSE}
-
+```{r package-load, echo = FALSE}
+install.packages("portalr")
+library(tidyverse)
+library(portalr)
+library(foreach)
+library(doParallel)
 ```
 
 ### Sourcing Files
@@ -64,7 +71,7 @@ We want to be able to use that function in this .Rmd file. We can tell R to read
 We do this with the `source()` function, which will run the entire script and put any outputs into our environment.
 
 ```{r}
-
+source("capt_hist_fxn.R")
 ```
 
 ## Creating Capture Histories
@@ -82,13 +89,20 @@ Because this lesson is using functions from a lot of different packages, I want 
 When you do this, you can use functions even if you haven't brought them into your workspace with the library function, as long as they are installed.
 
 ```{r}
+# you don't have to load a package to pull a function from a package you have installed on your PC
+# do this by using package::function
+# explicitly calling your functions can be helpful for readibility of your code for other users!
 
+ratdat <- portalr::summarise_individual_rodents()
+
+ratdat <- ratdat %>%
+  filter(tag != "0", !is.na(tag))
 ```
 
 Because this is a large dataframe, let's create a smaller version for now with only the first 1000 rows.
 
 ```{r}
-
+ratdat_small <- ratdat[1:1000, ] # 1000 rows, but all columns
 ```
 
 The `create_capture_hist()` function that we have read in has 2 arguments.
@@ -99,13 +113,15 @@ The `create_capture_hist()` function that we have read in has 2 arguments.
 Let's first create a vector with all of the unique tags in our `ratdat_small` dataframe. Then we can randomly choose 1 tag to see how to function output looks.
 
 ```{r}
+tags <- unique(ratdat_small$tag) # each unique value in tag column
 
+test_tag <- tags[24]
 ```
 
 Now, let's test the function.
 
 ```{r}
-
+create_capture_hist(test_tag, ratdat_small)
 ```
 
 It looks like our output is a combination of 2 different values: the capture history and then the tag. If we run a `for` loop over the `tags` vector with the function, we can create a dataframe with 2 columns.
@@ -113,7 +129,17 @@ It looks like our output is a combination of 2 different values: the capture his
 We will use the `bind_rows` function from the `tidyverse` to add each new row to the dataframe.
 
 ```{r}
+# create empty df
+capt_histories <- data.frame()
 
+for (i in 1:length(tags)) {
+  output <- create_capture_hist(tags[i], ratdat_small)
+  capt_histories <- rbind(capt_histories, output)
+}
+
+# we see that we have the same number of rows in our df as # of unique tags
+# success!
+# as we add more rows in our ratdat, it will take longer and longer
 ```
 
 The for loop worked pretty well!
@@ -121,7 +147,17 @@ The for loop worked pretty well!
 But that was only with 1000 rows (and 343 tags), and we have over 63,000 rows to iterate through. What if we try 10,000 rows?
 
 ```{r}
+ratdat_medium <- ratdat[1:10000, ]
 
+tags <- unique(ratdat_medium$tag)
+
+
+capt_histories <- data.frame()
+
+for (i in 1:length(tags)) {
+  output <- create_capture_hist(tags[i], ratdat_medium)
+  capt_histories <- rbind(capt_histories, output)
+}
 ```
 
 It is starting to take a bit longer to run this code...
@@ -149,11 +185,13 @@ The `apply` functions vary a bit in structure, but the `lapply` function has the
 -   any arguments (in addition to the data object) that need to be passed to the function
 
 ```{r}
+capt_histories <- lapply(tags, create_capture_hist, data = ratdat_medium)
 ```
 
-To convert the results into a dataframe, we can use the `do.call` function to treat each list as a row and bind them together.
-```{r}
+We will get a list returned to us. To convert the results into a dataframe, we can use the `do.call` function to treat each list as a row and bind them together.
 
+```{r}
+capt_histories <- do.call(rbind, capt_histories)
 ```
 
 This is still taking a while to run. Why don't we harness more of the power of our computer to help this run?
@@ -166,16 +204,24 @@ There are a number of ways that we can leverage the power of parallelization in 
 
 The `mclapply` function allows us to use the `lapply` function while using more than 1 core.
 
+mc stands for multicore.
+
 First, we need to figure out how many cores our computer has. We use the `detectCores()` function to do this. It is good practice to divide by 2 or subtract 1 so you don't take over your whole computer with R!
 
 ```{r}
+detectCores() # You've got 8 cores :P
+nCores <- detectCores()/2
+# good practice to at minimum leave 1 core for your PC to continue normal functions. Elen does half their cores
 
+
+capt_histories <- mclapply()
+  lapply(tags, create_capture_hist, data = ratdat_medium)
 ```
 
 We can now use the `mclapply` function just as we did with `lapply` but with the added `mc.cores` argument.
 
 ```{r eval=FALSE}
-
+capt_histories <- mclapply(tags, create_capture_hist, data = ratdat_medium, mc.cores = 4)
 ```
 
 ### 2. the `foreach` package

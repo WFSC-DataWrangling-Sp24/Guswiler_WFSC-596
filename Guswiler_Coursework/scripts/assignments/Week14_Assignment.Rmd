@@ -40,6 +40,15 @@ April 29 at midnight MST
 
 We will use a number of packages to complete this week's assignments. Load in the following packages: `tidyverse`, `foreach`, and `doParallel`.
 
+```{r}
+# install.packages("tidyverse")
+# install.packages("doParallel")
+# install.packages("foreach")
+library(tidyverse)
+library(doParallel)
+library(foreach)
+```
+
 ### 2. Use `apply` functions (20 points)
 
 Let's practice using `lapply` and the mutli-core cousin, `mclapply`.
@@ -48,6 +57,8 @@ Run the following code chunk to create a list to use as our data object.
 
 ```{r}
 seq_list <- as.list(seq(1, 500, by = 5))
+
+head(seq_list)
 ```
 
 Use the `head` function to look at the `seq_list` object. You will notice that the output looks different from the vectors and dataframes that we are used to looking at. That is because it is a list, a collection of data objects. But don't worry! The code for `lapply` and `mclapply` is the same as in the lesson.
@@ -55,6 +66,11 @@ Use the `head` function to look at the `seq_list` object. You will notice that t
 (a) Use `lapply` to take the square root of each number in `seq_list` (using the `sqrt` function). Then use `do.call` to covert the output into a dataframe. Use the `head` function to print the first 6 rows of the output.
 
 (b) Use `mclapply` to do the same thing. Remember to set up the number of cores you will use, first.
+
+```{r}
+#2a
+
+```
 
 ### 3. Use `foreach` (35 points)
 
