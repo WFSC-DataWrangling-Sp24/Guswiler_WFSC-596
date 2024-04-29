@@ -150,7 +150,7 @@ mass_from_length <- function(length, species) {
   return(mass)
 }
 
-#1a
+#2a
 dinosaur_masses <- vector("numeric",   # create a new vector to hold numeric output
                         length(dinosaur_lengths$lengths)) # same L as dino_lengths
 
@@ -161,13 +161,13 @@ for (i in 1:length(dinosaur_lengths$lengths)) {
 }
 head(dinosaur_masses)
 
-#1b
+#2b
 dinosaur_lengths <- dinosaur_lengths %>% # add masses to df
   mutate(masses = dinosaur_masses)
 
 head(dinosaur_lengths)
 
-#1c
+#2c
 dinosaur_lengths %>% 
   group_by(species) %>% 
   summarise(mean(masses))
