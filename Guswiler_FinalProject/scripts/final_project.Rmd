@@ -368,9 +368,9 @@ analysis_data %>%
        y = "Discrimination Ratio") +
   # set colors so they are different from previous plots
   scale_fill_brewer(palette = "Set3") +
+  theme_classic() +
   # remove legend
-  theme(legend.position = "none") +
-  theme_classic()
+  theme(legend.position = "none")
 
 # Total exploration bar plot
 analysis_data %>% 
@@ -378,15 +378,14 @@ analysis_data %>%
              fill = age_cat)) +
   geom_bar(position = "dodge",
            stat = "identity",
-           width = 0.75,
-           # remove legend (needs to be in a different spot for some reason)
-           show.legend = FALSE) +
+           width = 0.75) +
   # change main and axes titles
   labs(title = "TOR Total Test Exploration",
        x = "Age Category",
        y = "Exploration (s)") +
   scale_fill_brewer(palette = "Set3") +
-  theme_classic()
+  theme_classic() +
+  theme(legend.position = "none")
 ```
 
 Now run analyses for comparison between age category.
