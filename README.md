@@ -9,8 +9,8 @@ Contains all lessons, assignments, and associated files completed for the class.
   - assignment_keys: Assignment answer keys obtained from Dr. Ellen Bledsoe
 - outputs: Data visualizations saved from lessons and assignments
 - scripts:
-  - assignments: Rmarkdown scripts of all completed assigments
-  - lessons: Rmarkdown scripts of all lessons
+  - assignments: Rmarkdown and R scripts relating to assigments
+  - lessons: Rmarkdown and R scripts relating to lessons
 
 ## Guswiler_FinalProject/
 Contains all files associated with the final project for the class.
