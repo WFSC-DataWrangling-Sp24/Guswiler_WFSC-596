@@ -20,13 +20,13 @@ Create a fully computationally reproducible project that uses the skills we have
 
 ### Criteria for Success
 
-[ ] Project is in a GitHub repository.
+[x] Project is in a GitHub repository.
 
-[ ] Project is fully computationally reproducible, meaning your instructor can clone your GitHub repo, open the RStudio Project, and successfully recreate your project without having to make any changes to the code.
+[x] Project is fully computationally reproducible, meaning your instructor can clone your GitHub repo, open the RStudio Project, and successfully recreate your project without having to make any changes to the code.
 
-[ ] Project contains code or material from the appropriate number of weeks, as described below.
+[x] Project contains code or material from the appropriate number of weeks, as described below.
 
-[ ] RMarkdown file contains written descriptions of the tasks being performed.
+[x] RMarkdown file contains written descriptions of the tasks being performed.
 
 ### Due Date
 
@@ -38,20 +38,22 @@ For your final project in Data Wrangling in R, you will be synthesizing the conc
 
 In many ways, the content of the final project is up to you. However, there are a few guidelines that need to be met for your project to be considered complete. The guidelines differ based on whether you are in WFSC 496B or 596B, so be sure you are looking at the correct section.
 
-[ ] Week 1: Spreadsheets\
-[x] Week 2: Intro to R\
+[x] Week 1: Spreadsheets NEED TO ADD SECTION FOR CLEANING UP DATA AND RESAVING\
+[x] Week 2: Intro to R default\
 [x] Week 3: Data Tables and Pipes\
-[ ] Week 4: Groups and Joins\
-[ ] Week 5: Data Visualization\
-[ ] Week 6: Tidy Data\
+[x] Week 4: Groups and Joins\
+[x] Week 5: Data Visualization\
+[x] Week 6: Tidy Data\
 [ ] Week 7: Dates and Strings\
-[x] Week 8: Problem Decomposition\
-[x] Week 9: Reproducibility\
-[ ] Week 10: Functions\
-[ ] Week 11: Making Choices\
-[ ] Week 12: Iteration\
+[x] Week 8: Problem Decomposition default\
+[x] Week 9: Reproducibility default\
+[x] Week 10: Functions \*need 1/3\*\
+[x] Week 11: Making Choices \*need 1/3\*\
+[ ] Week 12: Iteration \*need 1/3\*\
 [ ] Week 13: Spatial Data\
 [ ] Week 14: Miscellaneous
+
+Need 10 weeks total
 
 ## General Requirements for the Project
 

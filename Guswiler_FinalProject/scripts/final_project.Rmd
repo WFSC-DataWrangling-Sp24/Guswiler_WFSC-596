@@ -54,7 +54,7 @@ There are several factors that need to be accounted for prior to beginning analy
     -   Old = 16.7 months and up
 -   Calculate each rat's Discrimination Ratio for the first 2 minutes of the test phase.
     -   Discrimination Ratio (DR): A metric commonly used to represent recognition memory sensitivity, based off on preferential exploration of an object that is less familiar over an object that is more familiar. A positive DR indicates preferential exploration for the less familiar object, a negative DR indicates preferential exploration of the familiar object, DR = 0 indicates no preference.
-    -   DR = (t~object from sample 1~ – t~object from sample 2~) / T~total~
+    -   DR = (t~object from sample 1~ -- t~object from sample 2~) / T~total~
         -   t = exploration time (s)
 -   Rats need to meet an exploration criteria at each phase of the task to encode an event to their memory and recall it. Therefore, individuals with insufficient exploration could confound results if they didn't explore an object during a sample phase and experience that object as novel during the test phase and should be excluded from analyses. Minimum exploration criteria is as follows:
     -   Sample Phases: exploration time for [each]{.underline} object [\>]{.underline} 5 s
@@ -236,7 +236,7 @@ There appears to be similar test performance and exploration between sexes, with
 
 # Analyses
 
-To make the process of comparisons among groups easier, first split up the data data frames based on age and sex.
+To make the process of comparisons among groups easier, first split up the data into data frames based on age and sex.
 
 ```{r}
 # Obtain the group names that will become the data frame names
@@ -252,5 +252,145 @@ by_group_data <- analysis_data %>%
   # add these to our working environment
   list2env(envir = .GlobalEnv)
 
-head()
+head(old_F)
+head(old_M)
+head(young_F)
+head(young_M)
+
+# Save these split groups in case of future needs
+#### keep this??
+write_csv(old_F, "../data_clean/tor_old_female.csv")
+write_csv(old_M, "../data_clean/tor_old_male.csv")
+write_csv(young_F, "../data_clean/tor_young_female.csv")
+write_csv(young_M, "../data_clean/tor_young_male.csv")
+```
+
+Perform t-tests to compare differences between sexes, within the two age categories.
+
+```{r}
+# Young rats
+#  t-test comparing performance during test phase
+t.test(young_F$disc_rat_2min,
+       young_M$disc_rat_2min,
+       # variance is relatively the same between groups
+       var.equal = TRUE)
+
+#  t-test comparing total exploration during test phase
+t.test(young_F$test_total_expl_s,
+       young_M$test_total_expl_s,
+       var.equal = TRUE)
+
+# Old rats
+#  t-test comparing performance during test phase
+t.test(old_F$disc_rat_2min,
+       old_M$disc_rat_2min,
+       var.equal = TRUE)
+
+#  t-test comparing total exploration during test phase
+t.test(old_F$test_total_expl_s,
+       old_M$test_total_expl_s,
+       var.equal = TRUE)
+```
+
+The results indicate that the null hypothesis cannot be rejected as false, within age categories the rats exhibit similar performance and exploration during the test phase, regardless of sex.
+
+Now, make comparisons between age categories alone. Begin by clearing environment, reading in data again, then splitting into data frames based on age category.
+
+```{r}
+#b/c there is no difference between sexes, we can collapse these groups and make comparisons between age_cat
+young <- bind_rows(young_F, young_M)
+old <- bind_rows(old_F, old_M)
+
+
+# remove below this in code chunk
+
+
+
+
+
+
+
+rm(list = ls())
+
+# read in .csv
+analysis_data <- read_csv("../data_clean/tor_full_data.csv") %>% 
+  # remove rats with insufficient exploration
+  filter(sufficient_expl == TRUE) %>% 
+  # select columns relevant to analysis
+  select(barnes_id, age_cat, sex,
+         disc_rat_2min,
+         test_first_2min_total_expl_s, test_total_expl_s,
+         test_first_visit_obj_4,
+         sample_1_east_obj_4_s, sample_1_west_obj_4_s,
+         sample_2_east_obj_19_s, sample_2_west_obj_19_s) %>% 
+  # group by age category
+  group_by(age_cat)
+
+# Obtain the group names that will become the data frame names
+naming <- unite(group_keys(analysis_data),
+                "group", age_cat)
+
+# Create the 'young' and 'old' data frames
+by_group_data <- analysis_data %>% 
+  # split the original data frames by groupings
+  group_split() %>% 
+  # name them based on the vector we created earlier
+  set_names(nm = naming$group) %>% 
+  # add these to our working environment
+  list2env(envir = .GlobalEnv)
+
+head(old)
+tail(old)
+head(young)
+tail(young)
+```
+
+Visualize again
+
+```{r}
+# Discrimination ratio box plot
+analysis_data %>%
+  ggplot(aes(age_cat, disc_rat_2min,
+             # fill colors by age category
+             fill = age_cat)) +
+  geom_boxplot() +
+  # add points by age and sex over corresponding box
+  geom_point(position = position_dodge(width = 0.75)) +
+  # add line at y = 0
+  geom_abline(slope = 0,
+              intercept = 0.0,
+              linetype = "dotted") +
+  # change y-axis limit to -1.0:1.0
+  expand_limits(y = 1.0) +
+  # change main and axes titles
+  labs(title = "TOR Test Performance",
+       x = "Age Category",
+       y = "Discrimination Ratio") +
+  # set colors so they are different from previous plots
+  scale_fill_brewer(palette = "Set3") +
+  # remove legend
+  theme(legend.position = "none") +
+  theme_classic()
+
+# Total exploration bar plot
+analysis_data %>% 
+  ggplot(aes(age_cat, test_total_expl_s,
+             fill = age_cat)) +
+  geom_bar(position = "dodge",
+           stat = "identity",
+           width = 0.75,
+           # remove legend (needs to be in a different spot for some reason)
+           show.legend = FALSE) +
+  # change main and axes titles
+  labs(title = "TOR Total Test Exploration",
+       x = "Age Category",
+       y = "Exploration (s)") +
+  scale_fill_brewer(palette = "Set3") +
+  theme_classic()
+```
+
+Now run analyses for comparison between age category.
+
+```{r}
+
 ```
