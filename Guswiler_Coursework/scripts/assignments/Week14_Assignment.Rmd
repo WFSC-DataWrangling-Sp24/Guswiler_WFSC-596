@@ -51,7 +51,7 @@ library(foreach)
 
 ### 2. Use `apply` functions (20 points)
 
-Let's practice using `lapply` and the mutli-core cousin, `mclapply`.
+Let's practice using `lapply` and the mutli-core cousin, `parLapply`.
 
 Run the following code chunk to create a list to use as our data object.
 
@@ -61,15 +61,30 @@ seq_list <- as.list(seq(1, 500, by = 5))
 head(seq_list)
 ```
 
-Use the `head` function to look at the `seq_list` object. You will notice that the output looks different from the vectors and dataframes that we are used to looking at. That is because it is a list, a collection of data objects. But don't worry! The code for `lapply` and `mclapply` is the same as in the lesson.
+Use the `head` function to look at the `seq_list` object. You will notice that the output looks different from the vectors and dataframes that we are used to looking at. That is because it is a list, a collection of data objects. But don't worry! The code for `lapply` and `parLapply` is the same as in the lesson.
 
 (a) Use `lapply` to take the square root of each number in `seq_list` (using the `sqrt` function). Then use `do.call` to covert the output into a dataframe. Use the `head` function to print the first 6 rows of the output.
 
-(b) Use `mclapply` to do the same thing. Remember to set up the number of cores you will use, first.
+(b) Use `parLapply` to do the same thing. Remember to set up the number of cores you will use, first.
 
 ```{r}
 #2a
+sqrt_list <- seq_list %>%            # take sqrt of list items
+  lapply(sqrt)
 
+sqrt_df <- do.call(rbind, sqrt_list) # bind list items into data frame
+
+head(sqrt_df)
+
+#2b
+nCores <- detectCores() - 2  # set number of cores to utilize in parallel
+
+clust <- makeCluster(nCores) # group cores into network
+
+sqrt_list <- parLapply(clust, seq_list, sqrt) # use multiple cores to take sqrt of list
+
+sqrt_df <- do.call(rbind, sqrt_list)
+head(sqrt_df)
 ```
 
 ### 3. Use `foreach` (35 points)
@@ -84,22 +99,90 @@ Use the `source` function to bring in the `mass_from_length` function (from Week
 
 (d) Go back through all of your code for question 3 and explicitly call all of the functions that you use. The ones you've written yourself do not need to be explicitly called.
 
+```{r}
+source("dino_allometry_fxn.R")
+dino_lengths <- read_csv("../../data_raw/dinosaur_lengths.csv")
+
+#3a
+dino_masses <- vector("numeric",   # create a new vector to hold numeric output
+                        length(dino_lengths$lengths)) # same L as dino_lengths
+
+for (i in 1:length(dino_lengths$lengths)) {
+  mass <- mass_from_length(dino_lengths$lengths[i],
+                           dino_lengths$species[i])
+  dino_masses[i] <- mass
+}
+head(dino_masses)
+
+#3b
+dino_masses <- foreach(i = 1:length(dino_lengths$lengths), .combine = c) %do% {
+  mass_from_length(dino_lengths$lengths[i],
+                   dino_lengths$species[i])
+}
+head(dino_masses)
+
+#3c
+registerDoParallel(nCores) # register cores into a cluster
+
+dino_masses <- foreach(i = 1:length(dino_lengths$lengths), .combine = c) %dopar% {
+  mass_from_length(dino_lengths$lengths[i],
+                   dino_lengths$species[i])
+}
+head(dino_masses)
+
+stopImplicitCluster()      # remove cores from cluster
+
+#3d
+source()
+read_csv()
+vector()
+length()
+mass_from_length()
+head()
+foreach()
+registerDoParallel()
+stopImplicitCluster()
+```
+
 ### 4. Forest Change through Time (35 points)
 
 The following code chunk reads in data about how much forested area is in each country. You might need to edit the file path to match your project structure.
 
 ```{r}
-forest <- read_csv("forest_per_country.csv", 
+forest <- read_csv("../../data_raw/forest_per_country.csv", 
                    skip = 4, col_names = TRUE) %>% 
   select(-`2022`)
 ```
 
 The `forest` data is not a fully cleaned dataset, especially when we look at the column names. You can either use the `rename()` function to rename them or encompass the names with back ticks in your `for` loops.
 
-(a) Write a for loop that calculates the change in forest per country from 1990 to 2021 by subtracting the 1990 value from the 2021 value.
-
-The output should be stored in a vector called `change_in_forest`. Print the head of `change_in_forest`.
-
-(b) Perform the same task as in (a) using the `foreach` function and the `%do%` operator. Use the `.combine = rbind` argument to save the output as a dataframe.
-
+(a) Write a for loop that calculates the change in forest per country from 1990 to 2021 by subtracting the 1990 value from the 2021 value. The output should be stored in a vector called `change_in_forest`. Print the head of `change_in_forest`.
+(b) Perform the same task as in (a) using the `foreach` function and the `%do%` operator. Use the `.combine = c` argument to save the output as a dataframe.
 (c) Do the same as in (b) but use parallel processing and the `%dopar%` operator.
+
+```{r}
+#4a
+change_in_forest <- vector("numeric", nrow(forest)) # create empty vector
+
+for (i in 1:nrow(forest)) {
+  diff <- forest$'2021'[i] - forest$'1990'[i] # take diff btwn forest in 1990 and 2021
+  change_in_forest[i] <- diff                 # store diff values in empty vector
+}
+head(change_in_forest)
+
+#4b
+change_in_forest <- foreach(i = 1:nrow(forest), .combine = c) %do% {
+  forest$'2021'[i] - forest$'1990'[i]
+}
+head(change_in_forest)
+
+#4c
+registerDoParallel(nCores) # register cores into a cluster
+
+change_in_forest <- foreach(i = 1:nrow(forest), .combine = c) %dopar% {
+  forest$'2021'[i] - forest$'1990'[i]
+}
+head(change_in_forest)
+
+stopImplicitCluster()      # remove cores from cluster
+```

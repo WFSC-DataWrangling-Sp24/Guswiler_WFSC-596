@@ -48,6 +48,7 @@ The `parallel` package is already installed with R, so we do not need to install
 We will also be using the `tidyverse` and `portalr`, so install those onto your computer as well, if you haven't already.
 
 ```{r install-pkgs, eval = FALSE}
+# install.packages("portalr")
 # install.packages("foreach")
 # install.packages("doParallel")
 ```
@@ -55,7 +56,6 @@ We will also be using the `tidyverse` and `portalr`, so install those onto your 
 And we load them into our working environment with the `library()` command.
 
 ```{r package-load, echo = FALSE}
-install.packages("portalr")
 library(tidyverse)
 library(portalr)
 library(foreach)
@@ -209,19 +209,21 @@ mc stands for multicore.
 First, we need to figure out how many cores our computer has. We use the `detectCores()` function to do this. It is good practice to divide by 2 or subtract 1 so you don't take over your whole computer with R!
 
 ```{r}
-detectCores() # You've got 8 cores :P
+parallel::detectCores() # You've got 8 cores :P
 nCores <- detectCores()/2
-# good practice to at minimum leave 1 core for your PC to continue normal functions. Elen does half their cores
-
-
-capt_histories <- mclapply()
-  lapply(tags, create_capture_hist, data = ratdat_medium)
+# good practice to at minimum leave 1 to 2 cores for your PC to continue normal functions. Elen does half their cores.
 ```
 
-We can now use the `mclapply` function just as we did with `lapply` but with the added `mc.cores` argument.
+We can now use the `parLapply` function just as we did with `lapply` but with the added `mc.cores` argument. Before hand, to make this work we need to make a cluster: grouping together all the cores that you want to use into an entity.
 
 ```{r eval=FALSE}
-capt_histories <- mclapply(tags, create_capture_hist, data = ratdat_medium, mc.cores = 4)
+clust <- makeCluster(nCores)
+# output is a group of the cores you're using. Basically a baby network of cores.
+
+
+results <- parLapply(cl = clust, tags,
+                     create_capture_hist,
+                     data = ratdat_medium)
 ```
 
 ### 2. the `foreach` package
@@ -233,7 +235,7 @@ Before we can utilize the parallel computing power of the `foreach` package and 
 The `foreach` function is basically a `for` loop that has been turned into a function. Some differences to note:
 
 -   we want to save the output as an object
--   we set `i = 1:length` to a length to iterate rather than `i in 1:length`
+-   we set **`i = 1:length`** to a length to iterate rather than `i in 1:length`
 -   we can specify the format of the results with the `.combine` function
 -   we use the `%do%` operator
 
@@ -242,7 +244,15 @@ Let's try it out!
 In this case, because the function's output is essentially 1 row, we are going to tell `foreach` to use the `rbind` function (base R version of `bind_rows`) to bring the results together.
 
 ```{r eval=FALSE}
+output <- foreach::foreach(i = 1:length(tags)) %do% {
+  create_capture_hist(tags[i], ratdat_small)
+}
+# the output from here is a large list of tiny data frames. We can use .combine to call rbind to make it into a full data frame.
 
+output <- foreach(i = 1:length(tags), .combine = rbind) %do% {
+  create_capture_hist(tags[i], ratdat_small)
+}
+# now our output looks like a data frame!
 ```
 
 #### Parallelization using `foreach`
@@ -252,20 +262,26 @@ We can modify the `foreach` function that we have written above to run on multip
 We have to tell the `doParallel` function to start using multiple cores with the `registerDoParallel` function. We then stop it with `stopImplicitCluster`.
 
 ```{r eval=FALSE}
-
+doParallel::registerDoParallel(nCores)
 ```
 
 We can use the `foreach` function and `%dopar%` operator to run our function for the entire dataset.
 
 ```{r eval=FALSE}
+output <- foreach(i = 1:length(tags), .combine = rbind) %dopar% {
+  create_capture_hist(tags[i], ratdat_small)
+}
 
+doParallel::stopImplicitCluster()
+
+# you want to stop your cluster after completing the parallelized portion of your code.
 ```
 
 ## High Performance Computing at UA
 
-If you are working with data that would benefit from parallelization (and especially parallelization on a large scale), consider learning about the High Performance Computing that UA offers.
+If you are working with data that would benefit from parallelization (and especially parallelization on a large scale), [consider learning about the High Performance Computing that UA offers]{.underline}.
 
-HPC access is available to anyone affiliated with UA, with a certain number of computing hours offered for free each month. You will likely need to be linked to a research group (AKA your PI's account).
+[HPC access is available to anyone affiliated with UA, with a certain number of computing hours offered for free each month]{.underline}. You will likely need to be linked to a research group (AKA your PI's account).
 
 Starting to work with the HPC system can be daunting, but UA has some really nice [documentation](https://uarizona.atlassian.net/wiki/spaces/UAHPC/pages/75990696/User+Guide) available.
 
