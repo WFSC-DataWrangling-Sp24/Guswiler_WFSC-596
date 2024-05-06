@@ -1,6 +1,7 @@
 This file outlines information for Olivia Guswiler's final project for WFSC-596, Spring Semester 2024. The code file referenced here can be found at the following:
-
 Guswiler_WFSC-596/Guswiler_FinalProject/scripts/final_project.R
+
+To ensure you have all necessary files, please download a local copy of this repository and run final_project.R from there.
 
 ## Incorporated Concepts and Where to Find Them
 
