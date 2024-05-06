@@ -11,6 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Temporal Ordering Memory Task. Data from Evelyn F. McKnight Brain Institute, University of Arizona. All rights and use of this data is reserved to the lab of Dr. Carol Barnes and is not available for reproduction or personal use.
 
+This code focuses on cleaning up the original data that is saved in four different .csv files, creating columns with calculations based on existing data, visualizing the data, and running analyses to compare performance among groups on this task.
+
 # Setup
 
 Install and load necessary packages.
