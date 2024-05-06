@@ -22,7 +22,7 @@ Lines 42-44, 172, 303, and 304.
 
 ### (5) Week 5: Data Visualization
 
-Lines 200-234 and .......
+Lines 200-234 and 304-340.
 
 ### (6) Week 6: Tidy Data
 

@@ -258,13 +258,6 @@ head(old_F)
 head(old_M)
 head(young_F)
 head(young_M)
-
-# Save these split groups in case of future needs
-#### keep this??
-write_csv(old_F, "../data_clean/tor_old_female.csv")
-write_csv(old_M, "../data_clean/tor_old_male.csv")
-write_csv(young_F, "../data_clean/tor_young_female.csv")
-write_csv(young_M, "../data_clean/tor_young_male.csv")
 ```
 
 Perform t-tests to compare differences between sexes, within the two age categories.
@@ -296,58 +289,17 @@ t.test(old_F$test_total_expl_s,
 
 The results indicate that the null hypothesis cannot be rejected as false, within age categories the rats exhibit similar performance and exploration during the test phase, regardless of sex.
 
+## Repeat
+
 Now, make comparisons between age categories alone. Begin by clearing environment, reading in data again, then splitting into data frames based on age category.
 
 ```{r}
 #b/c there is no difference between sexes, we can collapse these groups and make comparisons between age_cat
 young <- bind_rows(young_F, young_M)
 old <- bind_rows(old_F, old_M)
-
-
-# remove below this in code chunk
-
-
-
-
-
-
-
-rm(list = ls())
-
-# read in .csv
-analysis_data <- read_csv("../data_clean/tor_full_data.csv") %>% 
-  # remove rats with insufficient exploration
-  filter(sufficient_expl == TRUE) %>% 
-  # select columns relevant to analysis
-  select(barnes_id, age_cat, sex,
-         disc_rat_2min,
-         test_first_2min_total_expl_s, test_total_expl_s,
-         test_first_visit_obj_4,
-         sample_1_east_obj_4_s, sample_1_west_obj_4_s,
-         sample_2_east_obj_19_s, sample_2_west_obj_19_s) %>% 
-  # group by age category
-  group_by(age_cat)
-
-# Obtain the group names that will become the data frame names
-naming <- unite(group_keys(analysis_data),
-                "group", age_cat)
-
-# Create the 'young' and 'old' data frames
-by_group_data <- analysis_data %>% 
-  # split the original data frames by groupings
-  group_split() %>% 
-  # name them based on the vector we created earlier
-  set_names(nm = naming$group) %>% 
-  # add these to our working environment
-  list2env(envir = .GlobalEnv)
-
-head(old)
-tail(old)
-head(young)
-tail(young)
 ```
 
-Visualize again
+Create visualizations for the data separated only by age category.
 
 ```{r}
 # Discrimination ratio box plot
@@ -393,5 +345,16 @@ analysis_data %>%
 Now run analyses for comparison between age category.
 
 ```{r}
+# t-test comparing performance during test phase
+t.test(young$disc_rat_2min,
+       old$disc_rat_2min,
+       # variance is relatively the same between groups
+       var.equal = TRUE)
 
+# t-test comparing total exploration during test phase
+t.test(young$test_total_expl_s,
+       old$test_total_expl_s,
+       var.equal = TRUE)
 ```
+
+The results indicate that the null hypothesis is to be rejected, TOR test phase performance and time spent exploring differ between young and old rats.
